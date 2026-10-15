@@ -1,0 +1,9 @@
+{
+  maxHistory = 25;
+  maxEntrySize = 5242880;
+  autoClearDays = 1;
+  clearAtStartup = true;
+  disabled = false;
+  disableHistory = false;
+  disablePersist = false;
+}
