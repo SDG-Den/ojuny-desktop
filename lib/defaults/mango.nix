@@ -166,6 +166,7 @@
     MOZ_ENABLE_WAYLAND = "1";
     OZONE_PLATFORM = "wayland";
     NIXOS_OZONE_WL = "1";
+    WLR_RENDERER_ALLOW_SOFTWARE = "1";
   };
 
   var = { };
