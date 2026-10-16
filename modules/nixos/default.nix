@@ -1,12 +1,19 @@
 { self, inputs, ... }:
 {
-  flake.modules.nixos.ojuny-desktop = { config, lib, pkgs, ... }:
+  flake.modules.nixos.ojuny-desktop = { config, lib, pkgs, options, ... }:
   let
     cfg = config.desktop.ojuny;
     toMenuJson = (import ../../lib/dank-menu.nix { inherit lib; }).toMenuJson;
     menuFile = pkgs.writeText "ojuny-dankmenu.json" (toMenuJson cfg.dankMenu.menu);
     mangoDefaults = import ../../lib/defaults/mango.nix;
-    mangoColors = (import ../../lib/stylix-colors.nix { inherit lib; }).mangoColors;
+    dmsDefaults = import ../../lib/defaults/dms.nix;
+    stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
+    mangoColors = stylixColors.mangoColors;
+    dankThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
+      builtins.toJSON (stylixColors.dankTheme config.lib.stylix.colors)
+    );
+    mkWallpaper = import ../../lib/mk-wallpaper.nix { inherit lib pkgs; };
+    stylixWallpaper = mkWallpaper { colors = config.lib.stylix.colors; };
     stylixAvailable = (config.lib or { }) ? stylix;
     ojuny = import ../../lib/mk-ojuny.nix {
       inherit lib pkgs;
@@ -63,9 +70,29 @@
       ];
       desktop.ojuny.defaultApps = lib.mkDefault (with pkgs; [ ghostty firefox nautilus ]);
 
+      desktop.ojuny.mango.execOnce = lib.mkAfter [
+        "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE NIXOS_OZONE_WL XCURSOR_THEME XCURSOR_SIZE"
+        "systemctl --user reset-failed"
+        "systemctl --user start xdg-desktop-autostart.target"
+      ];
+
       desktop.ojuny.mango.global = lib.mkIf (cfg.stylix.enable && stylixAvailable) (
         lib.mkDefault (mangoDefaults.global // mangoColors config.lib.stylix.colors)
       );
+
+      desktop.ojuny.dms.settings = lib.mkIf (cfg.stylix.enable && stylixAvailable) (
+        lib.mkDefault (dmsDefaults.settings // {
+          currentThemeName = "custom";
+          customThemeFile = "${dankThemeFile}";
+          fontFamily = config.stylix.fonts.sansSerif.name;
+          monoFontFamily = config.stylix.fonts.monospace.name;
+          popupTransparency = config.stylix.opacity.popups;
+        })
+      );
+
+      stylix.image = lib.mkIf
+        (cfg.stylix.enable && stylixAvailable && options.stylix.base16Scheme.highestPrio < 1500)
+        (lib.mkDefault stylixWallpaper);
 
       environment.systemPackages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 

@@ -13,8 +13,40 @@ let
     };
 
   rgba = colors: name: alpha: "0x" + (bases colors).${name} + alpha;
+
+  dankTheme =
+    colors:
+    let
+      theme = {
+        name = "Stylix";
+        primary = colors.withHashtag.base0D;
+        primaryText = colors.withHashtag.base00;
+        primaryContainer = colors.withHashtag.base0C;
+        secondary = colors.withHashtag.base0E;
+        surface = colors.withHashtag.base01;
+        surfaceText = colors.withHashtag.base05;
+        surfaceVariant = colors.withHashtag.base02;
+        surfaceVariantText = colors.withHashtag.base04;
+        surfaceTint = colors.withHashtag.base0D;
+        background = colors.withHashtag.base00;
+        backgroundText = colors.withHashtag.base05;
+        outline = colors.withHashtag.base03;
+        surfaceContainer = colors.withHashtag.base01;
+        surfaceContainerHigh = colors.withHashtag.base02;
+        surfaceContainerHighest = colors.withHashtag.base03;
+        error = colors.withHashtag.base08;
+        warning = colors.withHashtag.base0A;
+        info = colors.withHashtag.base0C;
+      };
+    in
+    {
+      dark = theme;
+      light = theme;
+    };
 in
 {
+  inherit dankTheme;
+
   mangoColors = colors: {
     root_color = "0x323232ff";
     border_color = rgba colors "base02" "ff";

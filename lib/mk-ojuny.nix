@@ -36,6 +36,15 @@ let
       wl-clip-persist
       cliphist
       wlr-utils
+      ydotool
+      jq
+      fzf
+      eza
+      glib
+      networkmanager
+      cava
+      khal
+      matugen
     ] ++ extraPackages;
   };
 in

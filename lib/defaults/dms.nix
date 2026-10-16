@@ -53,6 +53,7 @@
         bottomGap = 0;
         centerWidgets = [ "music" "clock" "weather" ];
         enabled = true;
+        followInterfaceStyle = false;
         fontScale = 0.9;
         gothCornerRadiusOverride = false;
         gothCornerRadiusValue = 12;
@@ -144,9 +145,11 @@
         showOnLastDisplay = true;
         spacing = 0;
         squareCorners = true;
+        surfaceColor = "sch";
         transparency = 1;
         useOverlayLayer = false;
         visible = true;
+        widgetFollowInterfaceStyle = true;
         widgetOutlineEnabled = true;
         widgetPadding = 9;
         widgetTransparency = 1;

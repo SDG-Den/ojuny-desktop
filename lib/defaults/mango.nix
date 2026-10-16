@@ -1,3 +1,8 @@
+let
+  pasteScript = builtins.path { name = "paste.sh"; path = ./scripts/paste.sh; };
+  layoutbuttonScript = builtins.path { name = "layoutbutton.sh"; path = ./scripts/layoutbutton.sh; };
+  projectsScript = builtins.path { name = "projects.sh"; path = ./scripts/projects.sh; };
+in
 {
   global = {
     # input / keyboard
@@ -11,6 +16,7 @@
     mouse_accel_profile = 1;
     mouse_accel_speed = 0.0;
     mouse_left_handed = 0;
+    button_map = 1;
 
     # trackpad
     disable_trackpad = 0;
@@ -37,6 +43,12 @@
     focus_on_activate = 0;
     sloppy_focus = 1;
     warp_cursor = 1;
+    cursor_hide_timeout = 30;
+    cursor_hide_on_keypress = 0;
+    drag_tile_to_tile = 1;
+    drag_tile_small = 1;
+    drag_corner = 0;
+    drag_warp_cursor = 1;
     axis_bind_apply_timeout = 100;
 
     # monitors / tags
@@ -176,6 +188,8 @@
     "wl-clip-persist --clipboard both"
     "wl-paste --type text --watch cliphist store"
     "wl-paste --type image --watch cliphist store"
+    "ghostty"
+    "ydotoold"
   ];
 
   exec = [ ];
@@ -273,8 +287,8 @@
         description = "Toggle Fullscreen";
       };
       floating = {
-        modifier = [ "SUPER" ];
-        keys = [ "V" ];
+        modifier = [ "SUPER" "ALT" "CTRL" ];
+        keys = [ "O" ];
         dispatcher = "togglefloating";
         args = [ ];
         description = "Toggle Floating";
@@ -380,6 +394,158 @@
         args = "dms screenshot full";
         description = "Full Screenshot";
       };
+      terminalAlt = {
+        modifier = [ "SUPER" ];
+        keys = [ "Tab" ];
+        dispatcher = "spawn";
+        args = "ghostty";
+        description = "Terminal";
+      };
+      settingsEsc = {
+        modifier = [ "SUPER" ];
+        keys = [ "Escape" ];
+        dispatcher = "spawn";
+        args = "dms ipc call dankMenu toggle root";
+        description = "Toggle Settings";
+      };
+      layoutButton = {
+        modifier = [ "SUPER" ];
+        keys = [ "H" ];
+        dispatcher = "spawn_shell";
+        args = "${layoutbuttonScript}";
+        description = "Cycle Layout";
+      };
+      paste = {
+        modifier = [ "SUPER" ];
+        keys = [ "V" ];
+        dispatcher = "spawn_shell";
+        args = "${pasteScript}";
+        description = "Paste Clipboard";
+      };
+      projects = {
+        modifier = [ "SUPER" "SHIFT" ];
+        keys = [ "Tab" ];
+        dispatcher = "spawn_shell";
+        args = "ghostty --title='Floating-Menu' -e ${projectsScript}";
+        description = "Open Project";
+      };
+      specialTagToggle = {
+        modifier = [ "SUPER" "ALT" ];
+        keys = [ "SPACE" ];
+        dispatcher = "toggle_special_tag";
+        args = [ ];
+        description = "Toggle Special Tag";
+      };
+      specialTagWindow = {
+        modifier = [ "SUPER" ];
+        keys = [ "T" ];
+        dispatcher = "tag_special_tag";
+        args = [ ];
+        description = "Toggle Window Special Tag";
+      };
+      nextCircle = {
+        modifier = [ "ALT" ];
+        keys = [ "Tab" ];
+        dispatcher = "overcircle";
+        args = "next";
+        description = "Next Window";
+      };
+      viewUp = {
+        modifier = [ "SUPER" ];
+        keys = [ "Up" ];
+        dispatcher = "viewtoleft";
+        args = [ "0" ];
+        description = "Previous Tag";
+      };
+      viewDown = {
+        modifier = [ "SUPER" ];
+        keys = [ "Down" ];
+        dispatcher = "viewtoright";
+        args = [ "0" ];
+        description = "Next Tag";
+      };
+      tagsilent1 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "1" ]; dispatcher = "tagsilent"; args = [ "1" ]; description = "Move to Workspace 1"; };
+      tagsilent2 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "2" ]; dispatcher = "tagsilent"; args = [ "2" ]; description = "Move to Workspace 2"; };
+      tagsilent3 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "3" ]; dispatcher = "tagsilent"; args = [ "3" ]; description = "Move to Workspace 3"; };
+      tagsilent4 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "4" ]; dispatcher = "tagsilent"; args = [ "4" ]; description = "Move to Workspace 4"; };
+      tagsilent5 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "5" ]; dispatcher = "tagsilent"; args = [ "5" ]; description = "Move to Workspace 5"; };
+      tagsilent6 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "6" ]; dispatcher = "tagsilent"; args = [ "6" ]; description = "Move to Workspace 6"; };
+      tagsilent7 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "7" ]; dispatcher = "tagsilent"; args = [ "7" ]; description = "Move to Workspace 7"; };
+      tagsilent8 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "8" ]; dispatcher = "tagsilent"; args = [ "8" ]; description = "Move to Workspace 8"; };
+      tagsilent9 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "9" ]; dispatcher = "tagsilent"; args = [ "9" ]; description = "Move to Workspace 9"; };
+      tagsilent10 = { modifier = [ "SUPER" "SHIFT" ]; keys = [ "0" ]; dispatcher = "tagsilent"; args = [ "10" ]; description = "Move to Workspace 10"; };
+    };
+
+    common = {
+      keymodeDefault = {
+        modifier = [ "SUPER" ];
+        keys = [ "BackSpace" ];
+        dispatcher = "setkeymode";
+        args = "default";
+        description = "Key Mode: Default";
+      };
+      keymodeMovement = {
+        modifier = [ "SUPER" ];
+        keys = [ "F1" ];
+        dispatcher = "setkeymode";
+        args = "movement";
+        description = "Key Mode: Movement";
+      };
+      keymodeGroups = {
+        modifier = [ "SUPER" ];
+        keys = [ "F2" ];
+        dispatcher = "setkeymode";
+        args = "groups";
+        description = "Key Mode: Groups";
+      };
+      keymodeResize = {
+        modifier = [ "SUPER" ];
+        keys = [ "F3" ];
+        dispatcher = "setkeymode";
+        args = "resize";
+        description = "Key Mode: Resize";
+      };
+    };
+
+    movement = {
+      exchangeUp = { modifier = [ "none" ]; keys = [ "W" ]; dispatcher = "exchange_client"; args = "up"; description = "Swap With Client Above"; };
+      exchangeLeft = { modifier = [ "none" ]; keys = [ "A" ]; dispatcher = "exchange_client"; args = "left"; description = "Swap With Client Left"; };
+      exchangeDown = { modifier = [ "none" ]; keys = [ "S" ]; dispatcher = "exchange_client"; args = "down"; description = "Swap With Client Below"; };
+      exchangeRight = { modifier = [ "none" ]; keys = [ "D" ]; dispatcher = "exchange_client"; args = "right"; description = "Swap With Client Right"; };
+      tagsilent1 = { modifier = [ "none" ]; keys = [ "1" ]; dispatcher = "tagsilent"; args = [ "1" ]; description = "Send to Workspace 1"; };
+      tagsilent2 = { modifier = [ "none" ]; keys = [ "2" ]; dispatcher = "tagsilent"; args = [ "2" ]; description = "Send to Workspace 2"; };
+      tagsilent3 = { modifier = [ "none" ]; keys = [ "3" ]; dispatcher = "tagsilent"; args = [ "3" ]; description = "Send to Workspace 3"; };
+      tagsilent4 = { modifier = [ "none" ]; keys = [ "4" ]; dispatcher = "tagsilent"; args = [ "4" ]; description = "Send to Workspace 4"; };
+      tagsilent5 = { modifier = [ "none" ]; keys = [ "5" ]; dispatcher = "tagsilent"; args = [ "5" ]; description = "Send to Workspace 5"; };
+      tagsilent6 = { modifier = [ "none" ]; keys = [ "6" ]; dispatcher = "tagsilent"; args = [ "6" ]; description = "Send to Workspace 6"; };
+      tagsilent7 = { modifier = [ "none" ]; keys = [ "7" ]; dispatcher = "tagsilent"; args = [ "7" ]; description = "Send to Workspace 7"; };
+      tagsilent8 = { modifier = [ "none" ]; keys = [ "8" ]; dispatcher = "tagsilent"; args = [ "8" ]; description = "Send to Workspace 8"; };
+      tagsilent9 = { modifier = [ "none" ]; keys = [ "9" ]; dispatcher = "tagsilent"; args = [ "9" ]; description = "Send to Workspace 9"; };
+      tagsilent10 = { modifier = [ "none" ]; keys = [ "0" ]; dispatcher = "tagsilent"; args = [ "10" ]; description = "Send to Workspace 10"; };
+    };
+
+    groups = {
+      groupsmartUp = { modifier = [ "none" ]; keys = [ "W" ]; dispatcher = "groupsmart"; args = "up"; description = "Merge Group Up"; };
+      groupsmartLeft = { modifier = [ "none" ]; keys = [ "A" ]; dispatcher = "groupsmart"; args = "left"; description = "Merge Group Left"; };
+      groupsmartDown = { modifier = [ "none" ]; keys = [ "S" ]; dispatcher = "groupsmart"; args = "down"; description = "Merge Group Down"; };
+      groupsmartRight = { modifier = [ "none" ]; keys = [ "D" ]; dispatcher = "groupsmart"; args = "right"; description = "Merge Group Right"; };
+      toggleview1 = { modifier = [ "none" ]; keys = [ "1" ]; dispatcher = "toggleview"; args = [ "1" ]; description = "Toggle Workspace 1"; };
+      toggleview2 = { modifier = [ "none" ]; keys = [ "2" ]; dispatcher = "toggleview"; args = [ "2" ]; description = "Toggle Workspace 2"; };
+      toggleview3 = { modifier = [ "none" ]; keys = [ "3" ]; dispatcher = "toggleview"; args = [ "3" ]; description = "Toggle Workspace 3"; };
+      toggleview4 = { modifier = [ "none" ]; keys = [ "4" ]; dispatcher = "toggleview"; args = [ "4" ]; description = "Toggle Workspace 4"; };
+      toggleview5 = { modifier = [ "none" ]; keys = [ "5" ]; dispatcher = "toggleview"; args = [ "5" ]; description = "Toggle Workspace 5"; };
+      toggleview6 = { modifier = [ "none" ]; keys = [ "6" ]; dispatcher = "toggleview"; args = [ "6" ]; description = "Toggle Workspace 6"; };
+      toggleview7 = { modifier = [ "none" ]; keys = [ "7" ]; dispatcher = "toggleview"; args = [ "7" ]; description = "Toggle Workspace 7"; };
+      toggleview8 = { modifier = [ "none" ]; keys = [ "8" ]; dispatcher = "toggleview"; args = [ "8" ]; description = "Toggle Workspace 8"; };
+      toggleview9 = { modifier = [ "none" ]; keys = [ "9" ]; dispatcher = "toggleview"; args = [ "9" ]; description = "Toggle Workspace 9"; };
+      toggleview10 = { modifier = [ "none" ]; keys = [ "0" ]; dispatcher = "toggleview"; args = [ "10" ]; description = "Toggle Workspace 10"; };
+    };
+
+    resize = {
+      smartresizeUp = { modifier = [ "none" ]; keys = [ "W" ]; dispatcher = "smartresizewin"; args = "up"; description = "Resize Up"; };
+      smartresizeLeft = { modifier = [ "none" ]; keys = [ "A" ]; dispatcher = "smartresizewin"; args = "left"; description = "Resize Left"; };
+      smartresizeDown = { modifier = [ "none" ]; keys = [ "S" ]; dispatcher = "smartresizewin"; args = "down"; description = "Resize Down"; };
+      smartresizeRight = { modifier = [ "none" ]; keys = [ "D" ]; dispatcher = "smartresizewin"; args = "right"; description = "Resize Right"; };
     };
   };
 
