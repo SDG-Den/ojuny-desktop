@@ -62,8 +62,22 @@
       desktop.ojuny.mango.execOnce = lib.mkAfter [
         "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE NIXOS_OZONE_WL XCURSOR_THEME XCURSOR_SIZE"
         "systemctl --user reset-failed"
-        "systemctl --user start xdg-desktop-autostart.target"
+        "systemctl --user start mango-session.target"
       ];
+
+      systemd.user.targets.mango-session = {
+        Unit = {
+          Description = "mango compositor session";
+          Documentation = [ "man:systemd.special(7)" ];
+          BindsTo = [ "graphical-session.target" ];
+          Wants = [
+            "graphical-session-pre.target"
+            "xdg-desktop-autostart.target"
+          ];
+          After = [ "graphical-session-pre.target" ];
+          Before = [ "xdg-desktop-autostart.target" ];
+        };
+      };
 
       desktop.ojuny.mango.global = lib.mkIf (cfg.stylix.enable && stylixAvailable) (
         lib.mkDefault (mangoDefaults.global // mangoColors config.lib.stylix.colors)

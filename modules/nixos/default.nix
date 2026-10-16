@@ -75,8 +75,20 @@
       desktop.ojuny.mango.execOnce = lib.mkAfter [
         "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE NIXOS_OZONE_WL XCURSOR_THEME XCURSOR_SIZE"
         "systemctl --user reset-failed"
-        "systemctl --user start xdg-desktop-autostart.target"
+        "systemctl --user start mango-session.target"
       ];
+
+      systemd.user.targets.mango-session = {
+        description = "mango compositor session";
+        documentation = [ "man:systemd.special(7)" ];
+        bindsTo = [ "graphical-session.target" ];
+        wants = [
+          "graphical-session-pre.target"
+          "xdg-desktop-autostart.target"
+        ];
+        after = [ "graphical-session-pre.target" ];
+        before = [ "xdg-desktop-autostart.target" ];
+      };
 
       desktop.ojuny.mango.global = perKeyDefaults
         (mangoDefaults.global
@@ -110,6 +122,10 @@
       xdg.portal = {
         enable = lib.mkDefault true;
         wlr.enable = lib.mkDefault true;
+        wlr.settings.screencast = {
+          chooser_type = "simple";
+          chooser_cmd = "${pkgs.wlr-utils}/bin/wlr-chooser";
+        };
         extraPortals = with pkgs; [
           xdg-desktop-portal-wlr
           xdg-desktop-portal-gtk
