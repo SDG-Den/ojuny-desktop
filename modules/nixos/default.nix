@@ -121,6 +121,37 @@
         (rel: src: "L+ %h/.config/${rel} - - - - ${src}")
         ojuny.dmsConfigLinks;
 
+      systemd.user.services.ojuny-desktop-setup = {
+        description = "Prepare the ojuny desktop writable state";
+        wantedBy = [ "basic.target" ];
+        before = [ "systemd-tmpfiles-setup.service" ];
+        unitConfig.DefaultDependencies = false;
+        startLimitIntervalSec = 60;
+        startLimitBurst = 3;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = pkgs.writeShellApplication {
+            name = "ojuny-desktop-setup";
+            runtimeInputs = [ pkgs.coreutils ];
+            text = ''
+              legacyConfig="$HOME/.config/DankMaterialShell"
+              if [ -L "$legacyConfig" ]; then
+                rm -f "$legacyConfig"
+              fi
+              ${lib.optionalString (ojuny.dmsSessionFile != null) ''
+                install -d -m 0755 "$HOME/.local/state/DankMaterialShell"
+                sessionSeed=${ojuny.dmsSessionFile}
+                sessionTarget="$HOME/.local/state/DankMaterialShell/session.json"
+                if ! cmp -s "$sessionSeed" "$sessionTarget"; then
+                  cp "$sessionSeed" "$sessionTarget"
+                fi
+              ''}
+            '';
+          };
+        };
+      };
+
       services.displayManager.sessionPackages = [ session ];
 
       xdg.portal = {

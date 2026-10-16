@@ -36,18 +36,14 @@ let
     name: _: lib.nameValuePair "DankMaterialShell/plugins/${name}" "${dmsConfigDir}/DankMaterialShell/plugins/${name}"
   ) enabledPlugins;
 
-  dmsStateDir =
+  dmsSessionFile =
     if (settings.dms.session or { }) == { } then
       null
     else
-      pkgs.runCommand "ojuny-dms-state" { } ''
-        mkdir -p "$out/DankMaterialShell"
-        cp ${pkgs.writeText "session.json" rendered.dmsSessionJson} "$out/DankMaterialShell/session.json"
-      '';
+      pkgs.writeText "ojuny-dms-session.json" rendered.dmsSessionJson;
 
   dmsWrapper = import ./mk-dms-wrapper.nix {
-    inherit lib pkgs dms;
-    stateDir = dmsStateDir;
+    inherit pkgs dms;
   };
 
   mangoWrapper = import ./mk-mango-wrapper.nix {
@@ -72,5 +68,5 @@ let
   };
 in
 {
-  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir dmsConfigLinks dmsStateDir;
+  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir dmsConfigLinks dmsSessionFile;
 }

@@ -164,7 +164,7 @@ in
       session = mkOption {
         type = types.toml;
         default = { };
-        description = "DankMaterialShell session (session.json under XDG_STATE_HOME). `wallpaperPath`, `wallpaperPathLight` and `wallpaperPathDark` set the shell wallpaper.";
+        description = "DankMaterialShell session (session.json seeded into the XDG state directory at login). `wallpaperPath`, `wallpaperPathLight` and `wallpaperPathDark` set the shell wallpaper.";
       };
       barConfigs = mkOption {
         type = types.attrsOf types.toml;
