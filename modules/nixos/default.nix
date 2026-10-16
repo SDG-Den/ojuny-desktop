@@ -7,6 +7,7 @@
     menuFile = pkgs.writeText "ojuny-dankmenu.json" (toMenuJson cfg.dankMenu.menu);
     mangoDefaults = import ../../lib/defaults/mango.nix;
     dmsDefaults = import ../../lib/defaults/dms.nix;
+    perKeyDefaults = lib.mapAttrs (_: lib.mkDefault);
     stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
     mangoColors = stylixColors.mangoColors;
     dankThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
@@ -69,7 +70,7 @@
           dankMenu.settings = cfg.dankMenu.settings // lib.optionalAttrs (cfg.dankMenu.menu != { }) { menuPath = "${menuFile}"; };
         })
       ];
-      desktop.ojuny.defaultApps = lib.mkDefault (with pkgs; [ ghostty firefox nautilus ]);
+      desktop.ojuny.defaultApps = lib.mkAfter (with pkgs; [ ghostty firefox nautilus ]);
 
       desktop.ojuny.mango.execOnce = lib.mkAfter [
         "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE NIXOS_OZONE_WL XCURSOR_THEME XCURSOR_SIZE"
@@ -77,28 +78,30 @@
         "systemctl --user start xdg-desktop-autostart.target"
       ];
 
-      desktop.ojuny.mango.global = lib.mkIf (cfg.stylix.enable && stylixAvailable) (
-        lib.mkDefault (mangoDefaults.global // mangoColors config.lib.stylix.colors)
-      );
+      desktop.ojuny.mango.global = perKeyDefaults
+        (mangoDefaults.global
+          // lib.optionalAttrs (cfg.stylix.enable && stylixAvailable)
+            (mangoColors config.lib.stylix.colors));
 
-      desktop.ojuny.dms.settings = lib.mkIf (cfg.stylix.enable && stylixAvailable) (
-        lib.mkDefault (dmsDefaults.settings // {
-          currentThemeName = "custom";
-          customThemeFile = "${dankThemeFile}";
-          fontFamily = config.stylix.fonts.sansSerif.name;
-          monoFontFamily = config.stylix.fonts.monospace.name;
-          popupTransparency = config.stylix.opacity.popups;
-          dockTransparency = config.stylix.opacity.desktop;
-        })
-      );
+      desktop.ojuny.dms.settings = perKeyDefaults
+        (dmsDefaults.settings
+          // lib.optionalAttrs (cfg.stylix.enable && stylixAvailable) {
+            currentThemeName = "custom";
+            customThemeFile = "${dankThemeFile}";
+            fontFamily = config.stylix.fonts.sansSerif.name;
+            monoFontFamily = config.stylix.fonts.monospace.name;
+            popupTransparency = config.stylix.opacity.popups;
+            dockTransparency = config.stylix.opacity.desktop;
+          });
 
-      desktop.ojuny.dms.session = lib.mkIf
-        (cfg.stylix.enable && stylixAvailable && config.stylix.image != null)
-        (lib.mkDefault {
-          wallpaperPath = config.stylix.image;
-          wallpaperPathLight = config.stylix.image;
-          wallpaperPathDark = config.stylix.image;
-        });
+      desktop.ojuny.dms.session = perKeyDefaults
+        (lib.optionalAttrs
+          (cfg.stylix.enable && stylixAvailable && config.stylix.image != null)
+          {
+            wallpaperPath = config.stylix.image;
+            wallpaperPathLight = config.stylix.image;
+            wallpaperPathDark = config.stylix.image;
+          });
 
       environment.systemPackages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
