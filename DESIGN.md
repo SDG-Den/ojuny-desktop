@@ -10,7 +10,7 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 
 ## Configuration generation
 - Mango: TOML generated via custom `lib/to-toml.nix` from structured options (flattened `[global]` keys; binds, mousebinds, axisbinds, gesturebinds as tables; rules as arrays). Written to a store path and passed via `mango -c`.
-- DMS: the settings are rendered into a `config.d/00-ojuny.json` fragment, alongside `clsettings.json` (clipboard), `cheatsheets/binds.json`, `plugin_settings.json` and plugin sources, in a store `DankMaterialShell` config tree. The tree is symlinked to `~/.config/DankMaterialShell` per user (`systemd.user.tmpfiles` with `%h` on NixOS for all users, `home.file` on Home Manager); no `XDG_CONFIG_HOME` override. `lib/mk-ojuny.nix` returns the tree as `dmsConfigDir` (`ojuny-dms-config`).
+- DMS: the settings are rendered into a `config.d/00-ojuny.json` fragment, alongside `clsettings.json` (clipboard), `cheatsheets/binds.json`, `plugin_settings.json` and plugin sources, in a store `DankMaterialShell` config tree. Each generated file is symlinked individually into `~/.config/DankMaterialShell`, which stays a real, writable directory so DMS can create and update its own files there (`systemd.user.tmpfiles` with `%h` on NixOS for all users, `home.file` on Home Manager); no `XDG_CONFIG_HOME` override. `lib/mk-ojuny.nix` returns the link map as `dmsConfigLinks` and the tree as `dmsConfigDir` (`ojuny-dms-config`).
 - Keybinds: single source of truth in `desktop.ojuny.mango.binds/*` and related bind groups; cheatsheet JSON is generated from them via `lib/to-binds.nix`.
 
 ## Flake structure (dendritic)

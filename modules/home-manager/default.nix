@@ -104,7 +104,7 @@
 
       home.packages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
-      home.file.".config/DankMaterialShell".source = "${ojuny.dmsConfigDir}/DankMaterialShell";
+      home.file = lib.mapAttrs' (rel: src: lib.nameValuePair ".config/${rel}" { source = src; }) ojuny.dmsConfigLinks;
 
       assertions = [{
         assertion = !cfg.stylix.enable || stylixAvailable;

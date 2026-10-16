@@ -22,6 +22,20 @@ let
     )}
   '';
 
+  dmsConfigLinks = {
+    "DankMaterialShell/config.d/00-ojuny.json" = "${dmsConfigDir}/DankMaterialShell/config.d/00-ojuny.json";
+    "DankMaterialShell/cheatsheets/binds.json" = "${dmsConfigDir}/DankMaterialShell/cheatsheets/binds.json";
+  }
+  // lib.optionalAttrs (settings.dmsClipboard or { } != { }) {
+    "DankMaterialShell/clsettings.json" = "${dmsConfigDir}/DankMaterialShell/clsettings.json";
+  }
+  // lib.optionalAttrs (settings.managePluginSettings or true) {
+    "DankMaterialShell/plugin_settings.json" = "${dmsConfigDir}/DankMaterialShell/plugin_settings.json";
+  }
+  // lib.mapAttrs' (
+    name: _: lib.nameValuePair "DankMaterialShell/plugins/${name}" "${dmsConfigDir}/DankMaterialShell/plugins/${name}"
+  ) enabledPlugins;
+
   dmsStateDir =
     if (settings.dms.session or { }) == { } then
       null
@@ -58,5 +72,5 @@ let
   };
 in
 {
-  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir dmsStateDir;
+  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir dmsConfigLinks dmsStateDir;
 }

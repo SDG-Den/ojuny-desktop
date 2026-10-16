@@ -5,7 +5,7 @@ Pre-configured [mangoWM](https://github.com/mangowm/mango) + [DankMaterialShell]
 ## Features
 
 - Single source of truth: all mango/DMS settings exposed under `desktop.ojuny.*`
-- Store-derived configs: TOML/JSON generated in the Nix store; mango launched with `-c`, and the generated DMS config tree symlinked to `~/.config/DankMaterialShell` (all users on NixOS)
+- Store-derived configs: TOML/JSON generated in the Nix store; mango launched with `-c`, and each generated DMS config file symlinked into `~/.config/DankMaterialShell` (which stays writable; all users on NixOS)
 - Keybinds/cheatsheet generated from the same bind definitions
 - DMS plugin support (from `dms-plugin-registry`) with structured plugin settings
 - Optional dankMenu configuration via structured `desktop.ojuny.dankMenu.menu`
@@ -78,4 +78,4 @@ Key options under `desktop.ojuny.*`:
 ## Notes
 - Plugin sources from the DMS plugin registry are injected with `mkDefault`; override `desktop.ojuny.dms.plugins.<name>.src` to pin.
 - When `desktop.ojuny.dankMenu.menu` is non-empty and `dankMenu.enable` is true, a generated menu JSON is set via `menuPath` in plugin settings.
-- The DMS config tree is symlinked from the store to `~/.config/DankMaterialShell`; everything is store-derived and `~/.config` is otherwise left alone.
+- The generated DMS config files are symlinked from the store into `~/.config/DankMaterialShell`, which stays a writable directory; everything is store-derived.

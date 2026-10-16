@@ -24,7 +24,10 @@ pkgs.writeShellApplication {
   text = ''
     configHome="''${XDG_RUNTIME_DIR:-/tmp}/ojuny-desktop-$$"
     mkdir -p "$configHome"
-    ln -sfn ${ojuny.dmsConfigDir}/DankMaterialShell "$configHome/DankMaterialShell"
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (rel: src: ''
+      mkdir -p "$configHome/$(dirname ${rel})"
+      ln -sfn ${src} "$configHome/${rel}"
+    '') ojuny.dmsConfigLinks)}
     export XDG_CONFIG_HOME="$configHome"
     exec dbus-run-session -- ${ojuny.mangoWrapper}/bin/ojuny-mango "$@"
   '';

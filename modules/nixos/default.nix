@@ -117,9 +117,9 @@
 
       environment.systemPackages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
-      systemd.user.tmpfiles.rules = [
-        "L+ %h/.config/DankMaterialShell - - - - ${ojuny.dmsConfigDir}/DankMaterialShell"
-      ];
+      systemd.user.tmpfiles.rules = lib.mapAttrsToList
+        (rel: src: "L+ %h/.config/${rel} - - - - ${src}")
+        ojuny.dmsConfigLinks;
 
       services.displayManager.sessionPackages = [ session ];
 
