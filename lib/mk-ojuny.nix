@@ -22,9 +22,19 @@ let
     )}
   '';
 
+  dmsStateDir =
+    if (settings.dms.session or { }) == { } then
+      null
+    else
+      pkgs.runCommand "ojuny-dms-state" { } ''
+        mkdir -p "$out/DankMaterialShell"
+        cp ${pkgs.writeText "session.json" rendered.dmsSessionJson} "$out/DankMaterialShell/session.json"
+      '';
+
   dmsWrapper = import ./mk-dms-wrapper.nix {
     inherit lib pkgs dms;
     configDir = dmsConfigDir;
+    stateDir = dmsStateDir;
   };
 
   mangoWrapper = import ./mk-mango-wrapper.nix {
@@ -49,5 +59,5 @@ let
   };
 in
 {
-  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir;
+  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir dmsStateDir;
 }

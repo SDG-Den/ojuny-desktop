@@ -23,6 +23,7 @@
         inherit (cfg) mango;
         dms = {
           settings = cfg.dms.settings;
+          session = cfg.dms.session;
           inherit (cfg.dms)
             barConfigs
             dockConfigs
@@ -75,8 +76,17 @@
           fontFamily = config.stylix.fonts.sansSerif.name;
           monoFontFamily = config.stylix.fonts.monospace.name;
           popupTransparency = config.stylix.opacity.popups;
+          dockTransparency = config.stylix.opacity.desktop;
         })
       );
+
+      desktop.ojuny.dms.session = lib.mkIf
+        (cfg.stylix.enable && stylixAvailable && config.stylix.image != null)
+        (lib.mkDefault {
+          wallpaperPath = config.stylix.image;
+          wallpaperPathLight = config.stylix.image;
+          wallpaperPathDark = config.stylix.image;
+        });
 
       home.packages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 

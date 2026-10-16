@@ -103,6 +103,7 @@ let
     {
       mangoToml = toTOML sections;
       dmsJson = builtins.toJSON (renderDms dms);
+      dmsSessionJson = builtins.toJSON (dms.session or { });
       dmsClipboardJson = builtins.toJSON dmsClipboard;
       dmsPluginSettingsJson = builtins.toJSON (
         lib.mapAttrs (name: plugin: { enabled = plugin.enable; } // plugin.settings) (

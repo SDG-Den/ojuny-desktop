@@ -161,6 +161,11 @@ in
         default = dmsDefaults.settings;
         description = "DankMaterialShell settings (settings.json). Use the convenience options below for the collection keys (barConfigs, dockConfigs, controlCenterWidgets, dashCards, dashTabs, dashOptions); they override the same keys here.";
       };
+      session = mkOption {
+        type = types.toml;
+        default = { };
+        description = "DankMaterialShell session (session.json under XDG_STATE_HOME). `wallpaperPath`, `wallpaperPathLight` and `wallpaperPathDark` set the shell wallpaper.";
+      };
       barConfigs = mkOption {
         type = types.attrsOf types.toml;
         default = dmsDefaults.barConfigs;
