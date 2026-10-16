@@ -8,8 +8,8 @@ let
   mangoConfigFile = pkgs.writeText "ojuny-mango.toml" rendered.mangoToml;
 
   dmsConfigDir = pkgs.runCommand "ojuny-dms-config" { } ''
-    mkdir -p "$out/DankMaterialShell/cheatsheets" "$out/DankMaterialShell/plugins"
-    cp ${pkgs.writeText "settings.json" rendered.dmsJson} "$out/DankMaterialShell/settings.json"
+    mkdir -p "$out/DankMaterialShell/config.d" "$out/DankMaterialShell/cheatsheets" "$out/DankMaterialShell/plugins"
+    cp ${pkgs.writeText "settings.json" rendered.dmsJson} "$out/DankMaterialShell/config.d/00-ojuny.json"
     cp ${pkgs.writeText "binds.json" rendered.cheatsheetJson} "$out/DankMaterialShell/cheatsheets/binds.json"
     ${lib.optionalString (settings.dmsClipboard or { } != { }) ''
       cp ${pkgs.writeText "clsettings.json" rendered.dmsClipboardJson} "$out/DankMaterialShell/clsettings.json"
@@ -33,7 +33,6 @@ let
 
   dmsWrapper = import ./mk-dms-wrapper.nix {
     inherit lib pkgs dms;
-    configDir = dmsConfigDir;
     stateDir = dmsStateDir;
   };
 

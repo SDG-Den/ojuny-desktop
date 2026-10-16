@@ -104,6 +104,8 @@
 
       home.packages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
+      home.file.".config/DankMaterialShell".source = "${ojuny.dmsConfigDir}/DankMaterialShell";
+
       assertions = [{
         assertion = !cfg.stylix.enable || stylixAvailable;
         message = "desktop.ojuny.stylix.enable requires the stylix module to be imported (e.g. inputs.stylix.homeManagerModules.stylix).";

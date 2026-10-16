@@ -19,11 +19,11 @@ let
     }
     {
       color = "7fbbb3";
-      slot = "base08";
+      slot = "base0D";
     }
     {
       color = "e67e80";
-      slot = "base0E";
+      slot = "base08";
     }
     {
       color = "689e6a";

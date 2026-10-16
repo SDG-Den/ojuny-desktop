@@ -1,7 +1,7 @@
 # ojuny-desktop design
 
 ## Overview
-ojuny-desktop provides a wrapped desktop package and NixOS/Home Manager modules bundling pre-configured mangoWM + DankMaterialShell (DMS). It generates mango TOML and DMS JSON from Nix options and launches both via a wrapper that points them at store paths (no ~/.config writes).
+ojuny-desktop provides a wrapped desktop package and NixOS/Home Manager modules bundling pre-configured mangoWM + DankMaterialShell (DMS). It generates mango TOML and DMS JSON from Nix options. Mango is launched with `-c` against the store file; the generated DMS config tree is symlinked from the store into `~/.config/DankMaterialShell` so DMS reads it from the normal config location and keeps writing its own output to `~/.config`.
 
 Based on dendrite's mango/DMS configuration, using upstream `mangowm/mango` and `SDG-Den/DankMaterialShell`. Excludes g13, noodle variants, and personal-specific configs.
 
@@ -10,7 +10,7 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 
 ## Configuration generation
 - Mango: TOML generated via custom `lib/to-toml.nix` from structured options (flattened `[global]` keys; binds, mousebinds, axisbinds, gesturebinds as tables; rules as arrays). Written to a store path and passed via `mango -c`.
-- DMS: `settings.json`, `clsettings.json` (clipboard), `binds.json` (cheatsheet), `plugin_settings.json` written into a config directory; `XDG_CONFIG_HOME` is set to that directory for the DMS process. The wrapper exposes this directory via `ojuny-dms-config`.
+- DMS: the settings are rendered into a `config.d/00-ojuny.json` fragment, alongside `clsettings.json` (clipboard), `cheatsheets/binds.json`, `plugin_settings.json` and plugin sources, in a store `DankMaterialShell` config tree. The tree is symlinked to `~/.config/DankMaterialShell` per user (`systemd.user.tmpfiles` with `%h` on NixOS for all users, `home.file` on Home Manager); no `XDG_CONFIG_HOME` override. `lib/mk-ojuny.nix` returns the tree as `dmsConfigDir` (`ojuny-dms-config`).
 - Keybinds: single source of truth in `desktop.ojuny.mango.binds/*` and related bind groups; cheatsheet JSON is generated from them via `lib/to-binds.nix`.
 
 ## Flake structure (dendritic)
@@ -41,7 +41,7 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 - `lib/to-toml.nix`: custom ordered TOML renderer for mango schema
 - `lib/to-binds.nix`: converts bind groups to DMS cheatsheet JSON and to TOML bind tables
 - `lib/mk-ojuny.nix`: builds `mangoConfigFile`, `dmsConfigDir`, `mangoWrapper`, `dmsWrapper` from settings; symlinks enabled plugins
-- `lib/mk-mango-wrapper.nix`, `lib/mk-dms-wrapper.nix`: wrapper derivations (mango gets `-c`; DMS gets `XDG_CONFIG_HOME` pointing to config dir)
+- `lib/mk-mango-wrapper.nix`, `lib/mk-dms-wrapper.nix`: wrapper derivations (mango gets `-c`; the DMS wrapper supplies the DMS runtime PATH and points the state dir at the store)
 - `lib/defaults/*.nix`: default mango/DMS/clipboard values
 - `lib/dank-menu.nix`: serializes structured dankMenu tree to JSON (filters null/empty)
 - `lib/stylix-colors.nix`: maps stylix base16 colors to mango global color tokens

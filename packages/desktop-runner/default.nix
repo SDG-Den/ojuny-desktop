@@ -20,8 +20,12 @@ let
 in
 pkgs.writeShellApplication {
   name = "ojuny-desktop";
-  runtimeInputs = [ pkgs.dbus ];
+  runtimeInputs = [ pkgs.dbus pkgs.coreutils ];
   text = ''
+    configHome="''${XDG_RUNTIME_DIR:-/tmp}/ojuny-desktop-$$"
+    mkdir -p "$configHome"
+    ln -sfn ${ojuny.dmsConfigDir}/DankMaterialShell "$configHome/DankMaterialShell"
+    export XDG_CONFIG_HOME="$configHome"
     exec dbus-run-session -- ${ojuny.mangoWrapper}/bin/ojuny-mango "$@"
   '';
 }

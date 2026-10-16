@@ -1,4 +1,4 @@
-{ lib, pkgs, dms, configDir, stateDir ? null }:
+{ lib, pkgs, dms, stateDir ? null }:
 pkgs.writeShellApplication {
   name = "dms";
   runtimeInputs = [
@@ -12,7 +12,6 @@ pkgs.writeShellApplication {
     pkgs.khal
   ];
   text = ''
-    export XDG_CONFIG_HOME="${configDir}"
     ${lib.optionalString (stateDir != null) ''export XDG_STATE_HOME="${stateDir}"''}
     exec ${dms}/bin/dms "$@"
   '';

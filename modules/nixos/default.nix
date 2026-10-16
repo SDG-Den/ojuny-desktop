@@ -117,6 +117,10 @@
 
       environment.systemPackages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
+      systemd.user.tmpfiles.rules = [
+        "L+ %h/.config/DankMaterialShell - - - - ${ojuny.dmsConfigDir}/DankMaterialShell"
+      ];
+
       services.displayManager.sessionPackages = [ session ];
 
       xdg.portal = {
