@@ -147,6 +147,8 @@
                   cp "$sessionSeed" "$sessionTarget"
                 fi
               ''}
+              install -d -m 0755 "$HOME/.config/DankMaterialShell"
+              touch "$HOME/.config/DankMaterialShell/.firstlaunch"
             '';
           };
         };

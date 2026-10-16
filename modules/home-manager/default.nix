@@ -106,6 +106,11 @@
 
       home.file = lib.mapAttrs' (rel: src: lib.nameValuePair ".config/${rel}" { source = src; }) ojuny.dmsConfigLinks;
 
+      home.activation.ojunyDmsFirstLaunch = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD install -d -m 0755 "$HOME/.config/DankMaterialShell"
+        $DRY_RUN_CMD touch "$HOME/.config/DankMaterialShell/.firstlaunch"
+      '';
+
       assertions = [{
         assertion = !cfg.stylix.enable || stylixAvailable;
         message = "desktop.ojuny.stylix.enable requires the stylix module to be imported (e.g. inputs.stylix.homeManagerModules.stylix).";
