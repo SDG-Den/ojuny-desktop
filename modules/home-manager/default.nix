@@ -14,7 +14,7 @@
     );
     mkWallpaper = import ../../lib/mk-wallpaper.nix { inherit lib pkgs; };
     stylixWallpaper = mkWallpaper { colors = config.lib.stylix.colors; };
-    stylixAvailable = (config.lib or { }) ? stylix;
+    stylixAvailable = options ? stylix;
     ojuny = import ../../lib/mk-ojuny.nix {
       inherit lib pkgs;
       mango = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.mango;
@@ -42,7 +42,7 @@
   {
     imports = [ self.modules.homeManager.ojuny-desktop-options ];
 
-    config = lib.mkIf cfg.enable {
+    config = lib.mkIf cfg.enable ({
       desktop.ojuny.dms.plugins = lib.mkMerge [
         (lib.mapAttrs (_: plugin: { src = lib.mkDefault plugin; }) (
           inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system}
@@ -78,16 +78,16 @@
         })
       );
 
-      stylix.image = lib.mkIf
-        (cfg.stylix.enable && stylixAvailable && options.stylix.base16Scheme.highestPrio < 1500)
-        (lib.mkDefault stylixWallpaper);
-
       home.packages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
       assertions = [{
         assertion = !cfg.stylix.enable || stylixAvailable;
         message = "desktop.ojuny.stylix.enable requires the stylix module to be imported (e.g. inputs.stylix.homeManagerModules.stylix).";
       }];
-    };
+    } // lib.optionalAttrs (options ? stylix) {
+      stylix.image = lib.mkIf
+        (cfg.stylix.enable && options.stylix.base16Scheme.highestPrio < 1500)
+        (lib.mkDefault stylixWallpaper);
+    });
   };
 }
