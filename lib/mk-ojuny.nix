@@ -5,6 +5,21 @@ let
 
   enabledPlugins = lib.filterAttrs (_: plugin: plugin.enable) (settings.plugins or { });
 
+  pluginDir = name: plugin: if (plugin.dir or "") != "" then plugin.dir else name;
+
+  pluginSource = name: plugin:
+    let
+      config = plugin.config or { };
+    in
+    if config == { } then
+      plugin.src
+    else
+      pkgs.runCommand "ojuny-dms-plugin-${pluginDir name plugin}" { } ''
+        mkdir -p "$out"
+        cp -r ${plugin.src}/. "$out/"
+        cp ${pkgs.writeText "config.json" (builtins.toJSON config)} "$out/config.json"
+      '';
+
   mangoConfigFile = pkgs.writeText "ojuny-mango.toml" rendered.mangoToml;
 
   dmsConfigDir = pkgs.runCommand "ojuny-dms-config" { } ''
@@ -18,7 +33,7 @@ let
       cp ${pkgs.writeText "plugin_settings.json" rendered.dmsPluginSettingsJson} "$out/DankMaterialShell/plugin_settings.json"
     ''}
     ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (name: plugin: ''ln -s ${plugin.src} "$out/DankMaterialShell/plugins/${name}"'') enabledPlugins
+      lib.mapAttrsToList (name: plugin: ''ln -s ${pluginSource name plugin} "$out/DankMaterialShell/plugins/${pluginDir name plugin}"'') enabledPlugins
     )}
   '';
 
@@ -33,7 +48,7 @@ let
     "DankMaterialShell/plugin_settings.json" = "${dmsConfigDir}/DankMaterialShell/plugin_settings.json";
   }
   // lib.mapAttrs' (
-    name: _: lib.nameValuePair "DankMaterialShell/plugins/${name}" "${dmsConfigDir}/DankMaterialShell/plugins/${name}"
+    name: plugin: lib.nameValuePair "DankMaterialShell/plugins/${pluginDir name plugin}" "${dmsConfigDir}/DankMaterialShell/plugins/${pluginDir name plugin}"
   ) enabledPlugins;
 
   dmsSessionFile =

@@ -223,6 +223,16 @@ in
               default = { };
               description = "Plugin settings written to plugin_settings.json.";
             };
+            dir = mkOption {
+              type = types.str;
+              default = "";
+              description = "Directory name under plugins/ for this plugin's source. Empty means use the attribute key (the DMS plugin id). Set only when the plugin expects a different directory name.";
+            };
+            config = mkOption {
+              type = types.toml;
+              default = { };
+              description = "Extra configuration written to plugins/<dir>/config.json inside the plugin directory. Empty means no config.json is written.";
+            };
           };
         });
         default = { };

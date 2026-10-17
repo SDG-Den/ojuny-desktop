@@ -919,6 +919,8 @@ desktop.ojuny.dms.plugins.<name> = {
   enable = false;  # bool
   src = <path or package>;  # required
   settings = {};  # attrs/TOML written to plugin_settings.json
+  dir = "";  # string; plugins/ subdirectory name, empty means the attribute key
+  config = {};  # attrs/TOML written to plugins/<dir>/config.json
 };
 ```
 
@@ -971,6 +973,6 @@ When `menu` is non-empty and `enable` is true, modules write a generated menu JS
 - Mango bind groups (`binds/mousebind/axisbind/gesturebind`): full default tree is in `lib/defaults/mango.nix`; structure is mode -> name -> bind fields as documented.
 - Rules: `desktop.ojuny.mango.rules` is a TOML-typed set; defaults include `tag_rule` and `window_rule` entries as shown.
 - DMS settings: full defaults included above. Collection keys (`barConfigs`, `dockConfigs`, `controlCenterWidgets`, `dashCards`, `dashTabs`, `dashOptions`) are id-keyed attrsets rendered to arrays by `lib/mk-config.nix` (ordered by `_order`); the remaining keys live in `desktop.ojuny.dms.settings`. Clipboard defaults included above (`clsettings.json`).
-- DMS plugins: attrs keyed by plugin name with `enable`, `src` (path/package), `settings` (merged into `plugin_settings.json`).
+- DMS plugins: attrs keyed by plugin name with `enable`, `src` (path/package), `settings` (merged into `plugin_settings.json`), `dir` (plugins/ subdirectory name) and `config` (extra file at `plugins/<dir>/config.json`, e.g. the `nixMonitor` command set).
 - dankMenu: structured menu rows + extra settings; when menu non-empty, `menuPath` is set automatically.
 
