@@ -131,7 +131,7 @@
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
-          ExecStart = pkgs.writeShellApplication {
+          ExecStart = "${pkgs.writeShellApplication {
             name = "ojuny-desktop-setup";
             runtimeInputs = [ pkgs.coreutils ];
             text = ''
@@ -150,7 +150,7 @@
               install -d -m 0755 "$HOME/.config/DankMaterialShell"
               touch "$HOME/.config/DankMaterialShell/.firstlaunch"
             '';
-          };
+          }}/bin/ojuny-desktop-setup";
         };
       };
 
