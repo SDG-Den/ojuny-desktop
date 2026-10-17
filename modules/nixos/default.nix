@@ -188,6 +188,12 @@
       # gvfs sftp backend: valent (kdeconnect) mounts the device under
       # /run/user/<uid>/gvfs and nautilus reaches the remote over sftp.
       services.gvfs.enable = lib.mkDefault true;
+      # valent's sftp plugin runs `ssh-add` to register the device key before
+      # mounting; without a reachable agent the mount is aborted.
+      programs.ssh.startAgent = lib.mkDefault true;
+      environment.etc."environment.d/50-ssh-agent.conf".text = ''
+        SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent
+      '';
 
       assertions = [{
         assertion = !cfg.stylix.enable || stylixAvailable;

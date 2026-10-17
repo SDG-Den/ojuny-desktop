@@ -110,7 +110,15 @@ let
           lib.filterAttrs (_: plugin: plugin.enable) plugins
         )
       );
-      cheatsheetJson = builtins.toJSON (bindsLib.toCheatsheet (mango.binds or { }));
+      cheatsheetJson = builtins.toJSON (
+        bindsLib.toCheatsheet (
+          map (key: mango.${key} or { }) [
+            "binds"
+            "mousebind"
+            "axisbind"
+          ]
+        )
+      );
     };
 in
 {

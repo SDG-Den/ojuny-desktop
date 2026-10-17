@@ -14,18 +14,27 @@ let
 
   toBindTables = binds: lib.mapAttrs (_mode: mkBindTable) binds;
 
-  toCheatsheet = binds:
+  toCheatsheet = sources:
     let
-      mkEntry = b: {
-        key = keyFor b;
-        desc = b.description;
-        subcat = b.subcat or "General";
-      };
+      mkEntry = b:
+        {
+          key = keyFor b;
+          desc = b.description;
+          group = b.group or "Other";
+        }
+        // lib.optionalAttrs ((b.subcat or "") != "") { inherit (b) subcat; };
+
+      entriesOf =
+        binds: lib.concatMap (modeBinds: map mkEntry (builtins.attrValues modeBinds)) (builtins.attrValues binds);
+
+      grouped = lib.groupBy (e: e.group) (lib.concatMap entriesOf sources);
+
+      dropGroup = e: builtins.removeAttrs e [ "group" ];
     in
     {
       title = "Ojuny Binds";
       provider = "ojuny";
-      binds = lib.mapAttrs (_mode: modeBinds: map mkEntry (builtins.attrValues modeBinds)) binds;
+      binds = lib.mapAttrs (_: groupEntries: map dropGroup groupEntries) grouped;
     };
 in
 {

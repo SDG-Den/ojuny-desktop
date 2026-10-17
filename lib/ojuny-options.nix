@@ -28,9 +28,15 @@ let
         type = types.str;
         default = "";
       };
+      group = mkOption {
+        type = types.str;
+        default = "Other";
+        description = "Cheatsheet group (the top-level filter category).";
+      };
       subcat = mkOption {
         type = types.str;
-        default = "General";
+        default = "";
+        description = "Cheatsheet category used to sort within the group. Empty omits it.";
       };
     };
   };
