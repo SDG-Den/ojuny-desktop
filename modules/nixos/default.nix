@@ -25,8 +25,8 @@
         dms = {
           settings = cfg.dms.settings;
           session = cfg.dms.session;
+          barConfigs = lib.recursiveUpdate dmsDefaults.barConfigs cfg.dms.barConfigs;
           inherit (cfg.dms)
-            barConfigs
             dockConfigs
             controlCenterWidgets
             dashCards

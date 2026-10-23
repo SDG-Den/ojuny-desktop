@@ -86,6 +86,7 @@
             showWorkspaceIndex = true;
             showWorkspacePadding = true;
             workspacePaddingCount = 5;
+            workspaceIndicatorCompact = true;
             _order = 10;
           };
           dankKDEConnect = {
