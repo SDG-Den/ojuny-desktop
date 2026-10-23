@@ -32,7 +32,7 @@ let
       };
       dmsClipboard = import ../../lib/defaults/dms-clipboard.nix;
     };
-    extraPackages = with pkgs; [ ghostty firefox nautilus upower ];
+    extraPackages = with pkgs; [ ghostty firefox nautilus];
   };
 in
 pkgs.writeShellApplication {
