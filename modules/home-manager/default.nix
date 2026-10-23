@@ -117,7 +117,7 @@
 
       home.packages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
-      home.file = lib.mapAttrs' (rel: src: lib.nameValuePair ".config/${rel}" { source = src; }) ojuny.dmsConfigLinks;
+      home.file = lib.mapAttrs' (rel: src: lib.nameValuePair ".config/${rel}" { source = src; }) ojuny.configLinks;
 
       home.activation.ojunyDmsFirstLaunch = lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD install -d -m 0755 "$HOME/.config/DankMaterialShell"

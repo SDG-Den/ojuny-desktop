@@ -20,7 +20,7 @@ let
         cp ${pkgs.writeText "config.json" (builtins.toJSON config)} "$out/config.json"
       '';
 
-  mangoConfigFile = pkgs.writeText "ojuny-mango.toml" rendered.mangoToml;
+  mangoConfigFile = pkgs.writeText "ojuny.toml" rendered.mangoToml;
 
   dmsConfigDir = pkgs.runCommand "ojuny-dms-config" { } ''
     mkdir -p "$out/DankMaterialShell/config.d" "$out/DankMaterialShell/cheatsheets" "$out/DankMaterialShell/plugins"
@@ -37,7 +37,8 @@ let
     )}
   '';
 
-  dmsConfigLinks = {
+  configLinks = {
+    "mango/ojuny.toml" = mangoConfigFile;
     "DankMaterialShell/config.d/00-ojuny.json" = "${dmsConfigDir}/DankMaterialShell/config.d/00-ojuny.json";
     "DankMaterialShell/cheatsheets/binds.json" = "${dmsConfigDir}/DankMaterialShell/cheatsheets/binds.json";
   }
@@ -57,14 +58,16 @@ let
     else
       pkgs.writeText "ojuny-dms-session.json" rendered.dmsSessionJson;
 
+  configLinker = import ./mk-linker.nix {
+    inherit lib pkgs configLinks dmsSessionFile;
+  };
+
   dmsWrapper = import ./mk-dms-wrapper.nix {
     inherit pkgs dms;
   };
 
   mangoWrapper = import ./mk-mango-wrapper.nix {
-    inherit lib pkgs mango;
-    configFile = mangoConfigFile;
-    inherit dmsWrapper;
+    inherit lib pkgs mango configLinker dmsWrapper;
     runtimeInputs = with pkgs; [
       wl-clipboard
       wl-clip-persist
@@ -83,5 +86,5 @@ let
   };
 in
 {
-  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir dmsConfigLinks dmsSessionFile;
+  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir configLinks configLinker dmsSessionFile;
 }
