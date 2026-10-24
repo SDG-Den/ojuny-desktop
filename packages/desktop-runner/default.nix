@@ -12,6 +12,7 @@ let
   stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
   base16Lib = inputs.stylix.inputs.base16.lib { inherit pkgs lib; };
   colors = base16Lib.mkSchemeAttrs base16Scheme;
+  wallpaper = "${../../lib/wallpapers/everforest.png}";
   dmsThemeFile = pkgs.writeText "ojuny-dms-theme.json" (
     builtins.toJSON (stylixColors.dankTheme colors)
   );
@@ -28,6 +29,11 @@ let
         settings = dmsDefaults.settings // {
           currentThemeName = "custom";
           customThemeFile = "${dmsThemeFile}";
+        };
+        session = {
+          wallpaperPath = wallpaper;
+          wallpaperPathLight = wallpaper;
+          wallpaperPathDark = wallpaper;
         };
       };
       dmsClipboard = import ../../lib/defaults/dms-clipboard.nix;

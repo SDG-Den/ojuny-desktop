@@ -10,12 +10,19 @@
     perKeyDefaults = lib.mapAttrs (_: lib.mkDefault);
     stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
     mangoColors = stylixColors.mangoColors;
-    dankThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
+    fallbackColors = stylixColors.everforestDarkHard;
+    fallbackWallpaper = "${../../lib/wallpapers/everforest.png}";
+    fallbackThemeFile = pkgs.writeText "ojuny-dms-everforest-theme.json" (
+      builtins.toJSON stylixColors.fallbackTheme
+    );
+    stylixThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
       builtins.toJSON (stylixColors.dankTheme config.lib.stylix.colors)
     );
     mkWallpaper = import ../../lib/mk-wallpaper.nix { inherit lib pkgs; };
     stylixWallpaper = mkWallpaper { colors = config.lib.stylix.colors; };
     stylixAvailable = options ? stylix;
+    useStylixTheme = cfg.stylix.enable && stylixAvailable;
+    useFallbackTheme = !stylixAvailable;
     ojuny = import ../../lib/mk-ojuny.nix {
       inherit lib pkgs;
       mango = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.mango;
@@ -105,28 +112,44 @@
 
       desktop.ojuny.mango.global = perKeyDefaults
         (mangoDefaults.global
-          // lib.optionalAttrs (cfg.stylix.enable && stylixAvailable)
-            (mangoColors config.lib.stylix.colors));
+          // (
+            if useStylixTheme then
+              mangoColors config.lib.stylix.colors
+            else if useFallbackTheme then
+              mangoColors fallbackColors
+            else
+              { }
+          ));
 
       desktop.ojuny.dms.settings = perKeyDefaults
         (dmsDefaults.settings
-          // lib.optionalAttrs (cfg.stylix.enable && stylixAvailable) {
-            currentThemeName = "custom";
-            customThemeFile = "${dankThemeFile}";
-            fontFamily = config.stylix.fonts.sansSerif.name;
-            monoFontFamily = config.stylix.fonts.monospace.name;
-            popupTransparency = config.stylix.opacity.popups;
-            dockTransparency = config.stylix.opacity.desktop;
-          });
+          // (
+            if useStylixTheme then {
+              currentThemeName = "custom";
+              customThemeFile = "${stylixThemeFile}";
+              fontFamily = config.stylix.fonts.sansSerif.name;
+              monoFontFamily = config.stylix.fonts.monospace.name;
+              popupTransparency = config.stylix.opacity.popups;
+              dockTransparency = config.stylix.opacity.desktop;
+            } else if useFallbackTheme then {
+              currentThemeName = "custom";
+              customThemeFile = "${fallbackThemeFile}";
+            } else
+              { }
+          ));
 
-      desktop.ojuny.dms.session = perKeyDefaults
-        (lib.optionalAttrs
-          (cfg.stylix.enable && stylixAvailable && config.stylix.image != null)
-          {
-            wallpaperPath = config.stylix.image;
-            wallpaperPathLight = config.stylix.image;
-            wallpaperPathDark = config.stylix.image;
-          });
+      desktop.ojuny.dms.session = perKeyDefaults (
+        if useStylixTheme && config.stylix.image != null then {
+          wallpaperPath = config.stylix.image;
+          wallpaperPathLight = config.stylix.image;
+          wallpaperPathDark = config.stylix.image;
+        } else if useFallbackTheme then {
+          wallpaperPath = fallbackWallpaper;
+          wallpaperPathLight = fallbackWallpaper;
+          wallpaperPathDark = fallbackWallpaper;
+        } else
+          { }
+      );
 
       environment.systemPackages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 

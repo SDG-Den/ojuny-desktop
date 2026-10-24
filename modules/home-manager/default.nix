@@ -9,12 +9,19 @@
     dmsDefaults = import ../../lib/defaults/dms.nix;
     stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
     mangoColors = stylixColors.mangoColors;
-    dankThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
+    fallbackColors = stylixColors.everforestDarkHard;
+    fallbackWallpaper = "${../../lib/wallpapers/everforest.png}";
+    fallbackThemeFile = pkgs.writeText "ojuny-dms-everforest-theme.json" (
+      builtins.toJSON stylixColors.fallbackTheme
+    );
+    stylixThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
       builtins.toJSON (stylixColors.dankTheme config.lib.stylix.colors)
     );
     mkWallpaper = import ../../lib/mk-wallpaper.nix { inherit lib pkgs; };
     stylixWallpaper = mkWallpaper { colors = config.lib.stylix.colors; };
     stylixAvailable = options ? stylix;
+    useStylixTheme = cfg.stylix.enable && stylixAvailable;
+    useFallbackTheme = !stylixAvailable;
     ojuny = import ../../lib/mk-ojuny.nix {
       inherit lib pkgs;
       mango = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.mango;
@@ -92,28 +99,50 @@
         };
       };
 
-      desktop.ojuny.mango.global = lib.mkIf (cfg.stylix.enable && stylixAvailable) (
-        lib.mkDefault (mangoDefaults.global // mangoColors config.lib.stylix.colors)
+      desktop.ojuny.mango.global = lib.mkIf (useStylixTheme || useFallbackTheme) (
+        lib.mkDefault (
+          mangoDefaults.global
+          // (
+            if useStylixTheme then
+              mangoColors config.lib.stylix.colors
+            else
+              mangoColors fallbackColors
+          )
+        )
       );
 
-      desktop.ojuny.dms.settings = lib.mkIf (cfg.stylix.enable && stylixAvailable) (
-        lib.mkDefault (dmsDefaults.settings // {
-          currentThemeName = "custom";
-          customThemeFile = "${dankThemeFile}";
-          fontFamily = config.stylix.fonts.sansSerif.name;
-          monoFontFamily = config.stylix.fonts.monospace.name;
-          popupTransparency = config.stylix.opacity.popups;
-          dockTransparency = config.stylix.opacity.desktop;
-        })
+      desktop.ojuny.dms.settings = lib.mkIf (useStylixTheme || useFallbackTheme) (
+        lib.mkDefault (
+          dmsDefaults.settings
+          // (
+            if useStylixTheme then {
+              currentThemeName = "custom";
+              customThemeFile = "${stylixThemeFile}";
+              fontFamily = config.stylix.fonts.sansSerif.name;
+              monoFontFamily = config.stylix.fonts.monospace.name;
+              popupTransparency = config.stylix.opacity.popups;
+              dockTransparency = config.stylix.opacity.desktop;
+            } else {
+              currentThemeName = "custom";
+              customThemeFile = "${fallbackThemeFile}";
+            }
+          )
+        )
       );
 
       desktop.ojuny.dms.session = lib.mkIf
-        (cfg.stylix.enable && stylixAvailable && config.stylix.image != null)
-        (lib.mkDefault {
-          wallpaperPath = config.stylix.image;
-          wallpaperPathLight = config.stylix.image;
-          wallpaperPathDark = config.stylix.image;
-        });
+        ((useStylixTheme && config.stylix.image != null) || useFallbackTheme)
+        (lib.mkDefault (
+          if useStylixTheme && config.stylix.image != null then {
+            wallpaperPath = config.stylix.image;
+            wallpaperPathLight = config.stylix.image;
+            wallpaperPathDark = config.stylix.image;
+          } else {
+            wallpaperPath = fallbackWallpaper;
+            wallpaperPathLight = fallbackWallpaper;
+            wallpaperPathDark = fallbackWallpaper;
+          }
+        ));
 
       home.packages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
