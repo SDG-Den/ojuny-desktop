@@ -188,7 +188,7 @@ in
     "wl-clip-persist --clipboard both"
     "wl-paste --type text --watch cliphist store"
     "wl-paste --type image --watch cliphist store"
-    "ghostty"
+    "ojuny-ghostty"
     "ydotoold"
   ];
 
@@ -292,7 +292,7 @@ in
         modifier = [ "SUPER" ];
         keys = [ "Return" ];
         dispatcher = "spawn";
-        args = "ghostty";
+        args = "ojuny-ghostty";
         description = "Open terminal";
         group = "Applications";
         subcat = "Launch";
@@ -301,7 +301,7 @@ in
         modifier = [ "SUPER" ];
         keys = [ "Tab" ];
         dispatcher = "spawn";
-        args = "ghostty";
+        args = "ojuny-ghostty";
         description = "Open terminal";
         group = "Applications";
         subcat = "Launch";
@@ -355,7 +355,7 @@ in
         modifier = [ "SUPER" "SHIFT" ];
         keys = [ "Tab" ];
         dispatcher = "spawn_shell";
-        args = "ghostty --title='Floating-Menu' -e ${projectsScript}";
+        args = "ojuny-ghostty --title='Floating-Menu' -e ${projectsScript}";
         description = "Open projects (script pending)";
         group = "Applications";
         subcat = "Launch";

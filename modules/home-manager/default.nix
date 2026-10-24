@@ -22,6 +22,18 @@
     stylixAvailable = options ? stylix;
     useStylixTheme = cfg.stylix.enable && stylixAvailable;
     useFallbackTheme = !stylixAvailable;
+    pluginDefaults = import ../../lib/mk-plugin-defaults.nix {
+      inherit lib;
+      registry = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
+    };
+    ghosttyConfig = import ../../lib/mk-ghostty-config.nix {
+      inherit lib pkgs;
+      colors = if useStylixTheme then config.lib.stylix.colors else fallbackColors;
+    };
+    ghosttyWrapper = import ../../lib/mk-ghostty-wrapper.nix {
+      inherit lib pkgs;
+      configFile = ghosttyConfig;
+    };
     ojuny = import ../../lib/mk-ojuny.nix {
       inherit lib pkgs;
       mango = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.mango;
@@ -44,7 +56,7 @@
         plugins = cfg.dms.plugins;
         managePluginSettings = cfg.dms.managePluginSettings;
       };
-      extraPackages = cfg.defaultApps;
+      extraPackages = [ ghosttyWrapper ] ++ cfg.defaultApps;
     };
   in
   {
@@ -52,29 +64,12 @@
 
     config = lib.mkIf cfg.enable ({
       desktop.ojuny.dms.plugins = lib.mkMerge [
-        (lib.mapAttrs (_: plugin: { src = lib.mkDefault plugin; }) (
-          inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system}
-        ))
-        {
-          nixMonitor = {
-            dir = lib.mkDefault "NixMonitor";
-            config.generationsCommand = lib.mkDefault [ "sh" "-c" "ls -1 /nix/var/nix/profiles | grep -e 'system-' | wc -l" ];
-            config.storeSizeCommand = lib.mkDefault [ "sh" "-c" "du -sh /nix/store 2>/dev/null | cut -f1" ];
-            config.gcCommand = lib.mkDefault [ "sh" "-c" "nix-collect-garbage -d 2>&1" ];
-            config.localRevisionCommand = lib.mkDefault [ "sh" "-c" "nixos-version --hash 2>/dev/null | cut -c 1-7 || echo 'N/A'" ];
-            config.remoteRevisionCommand = lib.mkDefault [ "sh" "-c" "git ls-remote https://github.com/NixOS/nixpkgs.git nixos-unstable 2>/dev/null | cut -c 1-7 || echo 'N/A'" ];
-            config.nixpkgsChannel = lib.mkDefault "nixos-unstable";
-            config.updateInterval = lib.mkDefault 300;
-            config.rebuildCommand = lib.mkDefault [ "sh" "-c" "sudo nixos-rebuild switch --flake .#$(hostname)" ];
-          };
-        }
+        pluginDefaults.module
         (lib.mkIf cfg.dankMenu.enable {
-          dankMenu = {
-            enable = true;
-            settings = cfg.dankMenu.settings // lib.optionalAttrs (cfg.dankMenu.menu != { }) {
-              menuPath = "${menuFile}";
-            };
-          };
+          dankMenu.settings = lib.mkDefault (
+            cfg.dankMenu.settings
+            // lib.optionalAttrs (cfg.dankMenu.menu != { }) { menuPath = "${menuFile}"; }
+          );
         })
       ];
       desktop.ojuny.defaultApps = lib.mkDefault (with pkgs; [ ghostty firefox nautilus ]);
@@ -146,11 +141,13 @@
 
       home.packages = [ ojuny.mangoWrapper ] ++ cfg.defaultApps;
 
-      home.file = lib.mapAttrs' (rel: src: lib.nameValuePair ".config/${rel}" { source = src; }) ojuny.configLinks;
+      services.kdeconnect.enable = lib.mkDefault true;
+
+      xdg.configFile = lib.mapAttrs' (rel: src: lib.nameValuePair rel { source = src; }) ojuny.configLinks;
 
       home.activation.ojunyDmsFirstLaunch = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD install -d -m 0755 "$HOME/.config/DankMaterialShell"
-        $DRY_RUN_CMD touch "$HOME/.config/DankMaterialShell/.firstlaunch"
+        $DRY_RUN_CMD install -d -m 0755 "${config.xdg.configHome}/DankMaterialShell"
+        $DRY_RUN_CMD touch "${config.xdg.configHome}/DankMaterialShell/.firstlaunch"
       '';
 
       assertions = [{

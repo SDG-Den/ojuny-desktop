@@ -41,17 +41,23 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 - `lib/to-toml.nix`: custom ordered TOML renderer for mango schema
 - `lib/to-binds.nix`: converts bind groups to DMS cheatsheet JSON and to TOML bind tables
 - `lib/mk-ojuny.nix`: builds `mangoConfigFile`, `dmsConfigDir`, `configLinks`, `configLinker`, `mangoWrapper`, `dmsWrapper` from settings; symlinks enabled plugins
-- `lib/mk-linker.nix`: writes `ojuny-config`, which links `configLinks` into the user config directory, seeds `session.json`, and clears the legacy `~/.config/DankMaterialShell` symlink
+- `lib/mk-linker.nix`: writes `ojuny-config`, which links `configLinks` into the user config directory, seeds `session.json`, touches the DMS first-launch marker, and clears the legacy `~/.config/DankMaterialShell` symlink
 - `lib/mk-mango-wrapper.nix`, `lib/mk-dms-wrapper.nix`: wrapper derivations (mango runs `ojuny-config --links-only` then gets the stable `-c` path; the DMS wrapper supplies the DMS runtime PATH and points the state dir at the store)
-- `lib/defaults/*.nix`: default mango/DMS/clipboard values
+- `lib/mk-ghostty-config.nix`: renders the ojuny Ghostty settings and base16 palette into a store config
+- `lib/mk-ghostty-wrapper.nix`: builds `ojuny-ghostty`, which loads the generated config before the user's Ghostty config so user values win
+- `lib/defaults/*.nix`: default mango/DMS/clipboard/plugin values
+- `lib/mk-plugin-defaults.nix`: produces plain plugin defaults for the runner and `mkDefault`-wrapped defaults for the modules
 - `lib/dank-menu.nix`: serializes structured dankMenu tree to JSON (filters null/empty)
 - `lib/stylix-colors.nix`: maps stylix base16 colors to mango global color tokens
 
 ## Plugin registry
-DMS plugin registry (`inputs.dms-plugin-registry`) is mapped into `desktop.ojuny.dms.plugins.<name>.src = mkDefault ...` for both HM and NixOS, allowing overrides.
+DMS plugin registry (`inputs.dms-plugin-registry`) is mapped into `desktop.ojuny.dms.plugins.<name>.src = mkDefault ...` for both HM and NixOS, allowing overrides. `lib/defaults/plugins.nix` enables `dankMenu`, `dankKDEConnect`, `nixMonitor`, `localServices`, `scratchpadHelper`, and `developerUtilities` with `mkDefault` because the default UI references them. Their runtime dependencies (`iproute2`, `kdePackages.kdeconnect-kde`) are part of the session PATH, with `kdeconnect` enabled as a user service on NixOS and Home Manager.
 
 ## Nested runner (packages/desktop-runner)
-`packages.default` provides `ojuny-desktop` script that runs the wrapped session under `dbus-run-session` for a self-contained try-it experience with defaults.
+`packages.default` provides `ojuny-desktop` script that runs the wrapped session under `dbus-run-session` for a self-contained try-it experience with defaults. It uses temporary `XDG_CONFIG_HOME` and `XDG_STATE_HOME` directories, invokes the same `ojuny-config` linker as the modules, enables the shared plugin set, and places the generated Ghostty config in the temporary config home.
+
+## Ghostty
+Terminal binds and the startup terminal use `ojuny-ghostty`. The wrapper loads the generated config first, then the user's existing `$XDG_CONFIG_HOME/ghostty/config` and `config.ghostty`, with default file loading disabled. Because later files win, existing user settings are preserved. The raw `ghostty` binary is not replaced.
 
 ## What to exclude/port
 Exclude: g13, noodle variants, personal configurations. Use upstream mango and upstream DMS. Port generically; no `~/.config` writes.

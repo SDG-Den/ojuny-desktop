@@ -23,6 +23,18 @@
     stylixAvailable = options ? stylix;
     useStylixTheme = cfg.stylix.enable && stylixAvailable;
     useFallbackTheme = !stylixAvailable;
+    pluginDefaults = import ../../lib/mk-plugin-defaults.nix {
+      inherit lib;
+      registry = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
+    };
+    ghosttyConfig = import ../../lib/mk-ghostty-config.nix {
+      inherit lib pkgs;
+      colors = if useStylixTheme then config.lib.stylix.colors else fallbackColors;
+    };
+    ghosttyWrapper = import ../../lib/mk-ghostty-wrapper.nix {
+      inherit lib pkgs;
+      configFile = ghosttyConfig;
+    };
     ojuny = import ../../lib/mk-ojuny.nix {
       inherit lib pkgs;
       mango = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.mango;
@@ -45,7 +57,7 @@
         plugins = cfg.dms.plugins;
         managePluginSettings = cfg.dms.managePluginSettings;
       };
-      extraPackages = cfg.defaultApps;
+      extraPackages = [ ghosttyWrapper ] ++ cfg.defaultApps;
     };
 
     session = (pkgs.runCommand "ojuny-desktop-session" { } ''
@@ -69,25 +81,12 @@
 
     config = lib.mkIf cfg.enable ({
       desktop.ojuny.dms.plugins = lib.mkMerge [
-        (lib.mapAttrs (_: plugin: { src = lib.mkDefault plugin; }) (
-          inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system}
-        ))
-        {
-          nixMonitor = {
-            dir = lib.mkDefault "NixMonitor";
-            config.generationsCommand = lib.mkDefault [ "sh" "-c" "ls -1 /nix/var/nix/profiles | grep -e 'system-' | wc -l" ];
-            config.storeSizeCommand = lib.mkDefault [ "sh" "-c" "du -sh /nix/store 2>/dev/null | cut -f1" ];
-            config.gcCommand = lib.mkDefault [ "sh" "-c" "nix-collect-garbage -d 2>&1" ];
-            config.localRevisionCommand = lib.mkDefault [ "sh" "-c" "nixos-version --hash 2>/dev/null | cut -c 1-7 || echo 'N/A'" ];
-            config.remoteRevisionCommand = lib.mkDefault [ "sh" "-c" "git ls-remote https://github.com/NixOS/nixpkgs.git nixos-unstable 2>/dev/null | cut -c 1-7 || echo 'N/A'" ];
-            config.nixpkgsChannel = lib.mkDefault "nixos-unstable";
-            config.updateInterval = lib.mkDefault 300;
-            config.rebuildCommand = lib.mkDefault [ "sh" "-c" "sudo nixos-rebuild switch --flake .#$(hostname)" ];
-          };
-        }
+        pluginDefaults.module
         (lib.mkIf cfg.dankMenu.enable {
-          dankMenu.enable = true;
-          dankMenu.settings = cfg.dankMenu.settings // lib.optionalAttrs (cfg.dankMenu.menu != { }) { menuPath = "${menuFile}"; };
+          dankMenu.settings = lib.mkDefault (
+            cfg.dankMenu.settings
+            // lib.optionalAttrs (cfg.dankMenu.menu != { }) { menuPath = "${menuFile}"; }
+          );
         })
       ];
       desktop.ojuny.defaultApps = lib.mkAfter (with pkgs; [ ghostty firefox nautilus ]);
@@ -182,6 +181,7 @@
       };
 
       security.polkit.enable = lib.mkDefault true;
+      programs.kdeconnect.enable = lib.mkDefault true;
       programs.xwayland.enable = lib.mkDefault true;
       services.graphical-desktop.enable = lib.mkDefault true;
       # gvfs sftp backend: valent (kdeconnect) mounts the device under

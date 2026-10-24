@@ -3,12 +3,17 @@
   lib,
   inputs,
   mangowm,
+  dmsPluginRegistry,
   base16Scheme ? "${pkgs.base16-schemes}/share/themes/everforest-dark-hard.yaml",
   ...
 }:
 let
   mangoDefaults = import ../../lib/defaults/mango.nix;
   dmsDefaults = import ../../lib/defaults/dms.nix;
+  pluginDefaults = import ../../lib/mk-plugin-defaults.nix {
+    inherit lib;
+    registry = dmsPluginRegistry;
+  };
   stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
   base16Lib = inputs.stylix.inputs.base16.lib { inherit pkgs lib; };
   colors = base16Lib.mkSchemeAttrs base16Scheme;
@@ -16,6 +21,11 @@ let
   dmsThemeFile = pkgs.writeText "ojuny-dms-theme.json" (
     builtins.toJSON (stylixColors.dankTheme colors)
   );
+  ghosttyConfig = import ../../lib/mk-ghostty-config.nix { inherit lib pkgs colors; };
+  ghosttyWrapper = import ../../lib/mk-ghostty-wrapper.nix {
+    inherit lib pkgs;
+    configFile = ghosttyConfig;
+  };
 
   ojuny = import ../../lib/mk-ojuny.nix {
     inherit lib pkgs;
@@ -24,6 +34,7 @@ let
     settings = {
       mango = mangoDefaults // {
         global = mangoDefaults.global // stylixColors.mangoColors colors;
+        execOnce = mangoDefaults.execOnce ++ [ "kdeconnectd" ];
       };
       dms = dmsDefaults // {
         settings = dmsDefaults.settings // {
@@ -36,22 +47,26 @@ let
           wallpaperPathDark = wallpaper;
         };
       };
+      plugins = pluginDefaults.defaults;
       dmsClipboard = import ../../lib/defaults/dms-clipboard.nix;
     };
-    extraPackages = with pkgs; [ ghostty firefox nautilus];
+    extraPackages = with pkgs; [ ghostty ghosttyWrapper firefox nautilus ];
   };
 in
 pkgs.writeShellApplication {
   name = "ojuny-desktop";
   runtimeInputs = [ pkgs.dbus pkgs.coreutils ];
   text = ''
-    configHome="''${XDG_RUNTIME_DIR:-/tmp}/ojuny-desktop-$$"
-    mkdir -p "$configHome"
-    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (rel: src: ''
-      mkdir -p "$configHome/$(dirname ${rel})"
-      ln -sfn ${src} "$configHome/${rel}"
-    '') ojuny.configLinks)}
-    export XDG_CONFIG_HOME="$configHome"
+    root="''${XDG_RUNTIME_DIR:-/tmp}/ojuny-desktop-$$"
+    export XDG_CONFIG_HOME="$root/config"
+    export XDG_STATE_HOME="$root/state"
+    mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
+
+    ${ojuny.configLinker}/bin/ojuny-config
+
+    install -d -m 0755 "$XDG_CONFIG_HOME/ghostty"
+    ln -sfn ${ghosttyConfig} "$XDG_CONFIG_HOME/ghostty/config"
+
     exec dbus-run-session -- ${ojuny.mangoWrapper}/bin/ojuny-mango "$@"
   '';
 }

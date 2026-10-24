@@ -253,7 +253,7 @@ in
     };
 
     dankMenu = {
-      enable = mkEnableOption "the dankMenu plugin with a Nix-managed menu";
+      enable = mkEnableOption "a Nix-managed dankMenu menu (the plugin itself is enabled by default)";
       menu = mkOption {
         type = types.attrsOf menuRowModule;
         default = { };

@@ -82,6 +82,8 @@ let
       cava
       khal
       matugen
+      iproute2
+      kdePackages.kdeconnect-kde
     ] ++ extraPackages;
   };
 in

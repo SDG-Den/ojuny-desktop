@@ -927,7 +927,7 @@ desktop.ojuny.dms.plugins.<name> = {
 
 ## `desktop.ojuny.dankMenu`
 
-- `desktop.ojuny.dankMenu.enable` (type: bool, default: false) — Whether to enable the dankMenu plugin with a Nix-managed menu.
+- `desktop.ojuny.dankMenu.enable` (type: bool, default: false) — Whether to use a Nix-managed dankMenu menu. The dankMenu plugin itself is enabled by default.
 - `desktop.ojuny.dankMenu.menu` (type: attrsOf, default: {}) — dankMenu tree keyed by dotted id (e.g. "learn.keybinds"). A non-empty tree overrides the plugin's bundled menu through the menuPath setting.
 - `desktop.ojuny.dankMenu.settings` (type: either, default: {}) — Additional dankMenu plugin settings merged into plugin_settings.json.
 
@@ -949,7 +949,7 @@ desktop.ojuny.dankMenu.menu."<dotted-id>" = {
 };
 ```
 
-When `menu` is non-empty and `enable` is true, modules write a generated menu JSON and set `menuPath` in `dankMenu` plugin settings.
+When `menu` is non-empty and `enable` is true, modules write a generated menu JSON and set `menuPath` in `dankMenu` plugin settings. The plugin uses its bundled menu otherwise.
 
 
 ## `desktop.ojuny.dms.clipboardSettings` — Full default structure

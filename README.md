@@ -6,10 +6,12 @@ Pre-configured [mangoWM](https://github.com/mangowm/mango) + [DankMaterialShell]
 
 - Single source of truth: all mango/DMS settings exposed under `desktop.ojuny.*`
 - Store-derived configs: TOML/JSON generated in the Nix store; mango launched with `-c ~/.config/mango/ojuny.toml`, and each generated DMS config file symlinked into `~/.config/DankMaterialShell` (which stays writable; all users on NixOS)
+- Shared session bootstrap: the first-launch marker and DMS session state are seeded by the same linker for `nix run`, NixOS, and Home Manager
 - Keybinds/cheatsheet generated from the same bind definitions
-- DMS plugin support (from `dms-plugin-registry`) with structured plugin settings
+- DMS plugin support (from `dms-plugin-registry`) with structured plugin settings, including a default set used by the bar, control center, and menu
 - Optional dankMenu configuration via structured `desktop.ojuny.dankMenu.menu`
-- Optional stylix integration mapping colors into mango's global theme
+- Optional stylix integration mapping colors into mango's global theme and Ghostty
+- `ojuny-ghostty` wrapper that layers the ojuny Ghostty defaults under the user's existing Ghostty config
 - `nix run` provides a self-contained nested desktop for testing
 
 ## Usage
@@ -76,7 +78,9 @@ Key options under `desktop.ojuny.*`:
 - `defaultApps` — list of packages added to session PATH
 
 ## Notes
-- Plugin sources from the DMS plugin registry are injected with `mkDefault`; override `desktop.ojuny.dms.plugins.<name>.src` to pin.
-- When `desktop.ojuny.dankMenu.menu` is non-empty and `dankMenu.enable` is true, a generated menu JSON is set via `menuPath` in plugin settings.
+- Plugin sources from the DMS plugin registry are injected with `mkDefault`; override `desktop.ojuny.dms.plugins.<name>.src` to pin. `dankMenu`, `dankKDEConnect`, `nixMonitor`, `localServices`, `scratchpadHelper`, and `developerUtilities` are enabled with `mkDefault` because the default bar, control center, and binds use them. Set `desktop.ojuny.dms.plugins.<name>.enable = false` to disable one.
+- When `desktop.ojuny.dankMenu.menu` is non-empty and `dankMenu.enable` is true, a generated menu JSON is set via `menuPath` in plugin settings. The dankMenu plugin itself stays enabled with its bundled menu otherwise.
 - The generated DMS config files are symlinked from the store into `~/.config/DankMaterialShell`, which stays a writable directory; everything is store-derived.
 - On NixOS the `ojuny-config` user oneshot repoints every generated link during activation (`restartTriggers`), so a switch updates `~/.config` without a relogin. Restart DMS afterwards to reload both DMS and mango.
+- `nix run` uses temporary `XDG_CONFIG_HOME` and `XDG_STATE_HOME` directories, runs the same linker, and seeds the first-launch marker and session state there. It does not touch the user's DMS configuration.
+- Terminal binds and the startup terminal use `ojuny-ghostty`. That wrapper loads the generated ojuny Ghostty config first and then the user's existing `ghostty/config` and `config.ghostty`, so user settings win. The raw `ghostty` binary is not replaced in NixOS or Home Manager. Under `nix run`, the generated config is also placed in the temporary `XDG_CONFIG_HOME`.
