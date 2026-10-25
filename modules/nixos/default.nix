@@ -166,6 +166,7 @@
       };
 
       services.displayManager.sessionPackages = [ session ];
+      services.displayManager.defaultSession = lib.mkDefault "ojuny";
 
       xdg.portal = {
         enable = lib.mkDefault true;
