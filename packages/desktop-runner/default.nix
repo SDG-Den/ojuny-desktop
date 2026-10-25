@@ -64,6 +64,11 @@ pkgs.writeShellApplication {
 
     ${ojuny.configLinker}/bin/ojuny-config
 
+    if [ ! -e /run/opengl-driver ]; then
+      export __EGL_VENDOR_LIBRARY_FILENAMES="${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json''${__EGL_VENDOR_LIBRARY_FILENAMES:+:$__EGL_VENDOR_LIBRARY_FILENAMES}"
+      export LIBGL_ALWAYS_SOFTWARE="''${LIBGL_ALWAYS_SOFTWARE:-1}"
+    fi
+
     install -d -m 0755 "$XDG_CONFIG_HOME/ghostty"
     ln -sfn ${ghosttyConfig} "$XDG_CONFIG_HOME/ghostty/config"
 
