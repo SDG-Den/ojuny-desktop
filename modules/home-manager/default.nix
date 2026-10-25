@@ -70,6 +70,7 @@
         name = "ojuny-hm-session";
         text = ''
           if [ -r "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh" ]; then
+            # shellcheck source=/dev/null
             . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
           fi
           exec ${ojuny.mangoWrapper}/bin/ojuny-mango "$@"
