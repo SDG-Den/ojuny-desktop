@@ -12,6 +12,7 @@ Pre-configured [mangoWM](https://github.com/mangowm/mango) + [DankMaterialShell]
 - Optional dankMenu configuration via structured `desktop.ojuny.dankMenu.menu`
 - Optional stylix integration mapping colors into mango's global theme and Ghostty
 - `ojuny-ghostty` wrapper that layers the ojuny Ghostty defaults under the user's existing Ghostty config
+- Home Manager installs a `wayland-sessions/ojuny.desktop` entry in the user profile for display managers configured to scan it
 - `nix run` provides a self-contained nested desktop for testing
 
 ## Usage
@@ -84,3 +85,4 @@ Key options under `desktop.ojuny.*`:
 - On NixOS the `ojuny-config` user oneshot repoints every generated link during activation (`restartTriggers`), so a switch updates `~/.config` without a relogin. Restart DMS afterwards to reload both DMS and mango.
 - `nix run` uses temporary `XDG_CONFIG_HOME` and `XDG_STATE_HOME` directories, runs the same linker, and seeds the first-launch marker and session state there. It does not touch the user's DMS configuration.
 - Terminal binds and the startup terminal use `ojuny-ghostty`. That wrapper loads the generated ojuny Ghostty config first and then the user's existing `ghostty/config` and `config.ghostty`, so user settings win. The raw `ghostty` binary is not replaced in NixOS or Home Manager. Under `nix run`, the generated config is also placed in the temporary `XDG_CONFIG_HOME`.
+- The Home Manager session entry is installed at `$profile/share/wayland-sessions/ojuny.desktop`. GDM and LightDM do not scan the user profile by default. Symlink it into `/usr/share/wayland-sessions`, or point a display manager with a configurable session directory at the profile path.
