@@ -10,7 +10,7 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 
 ## Configuration generation
 - Mango: TOML generated via custom `lib/to-toml.nix` from structured options (flattened `[global]` keys; binds, mousebinds, axisbinds, gesturebinds as tables; rules as arrays). Written to a store path and linked as `~/.config/mango/ojuny.toml`, which the wrapper passes via `mango -c`. The link sits beside any user-owned `config.toml`/`config.conf`; mango's watcher matches events by exact path, so only `ojuny.toml` changes trigger a reload.
-- DMS: the settings are rendered into a `config.d/00-ojuny.json` fragment, alongside `clsettings.json` (clipboard), `cheatsheets/binds.json`, `plugin_settings.json` and plugin sources, in a store `DankMaterialShell` config tree. Each generated file is symlinked individually into `~/.config/DankMaterialShell`, which stays a real, writable directory so DMS can create and update its own files there (`ojuny-config` user oneshot with `restartTriggers` on NixOS for all users, `home.file` on Home Manager); no `XDG_CONFIG_HOME` override. `lib/mk-ojuny.nix` returns the link map as `configLinks` and the tree as `dmsConfigDir` (`ojuny-dms-config`).
+- DMS: the settings are rendered into a `config.d/00-ojuny.json` fragment, alongside `clsettings.json` (clipboard), `cheatsheets/binds.json`, `plugin_settings.json` and plugin sources, in a store `DankMaterialShell` config tree. Each generated file is symlinked individually into `~/.config/DankMaterialShell`, which stays a real, writable directory so DMS can create and update its own files there (`ojuny-config` user oneshot with `restartTriggers` on NixOS for all users, `home.file` plus an `ojuny-config --seed` user service on Home Manager); no `XDG_CONFIG_HOME` override. `lib/mk-ojuny.nix` returns the link map as `configLinks` and the tree as `dmsConfigDir` (`ojuny-dms-config`).
 - Keybinds: single source of truth in `desktop.ojuny.mango.binds/*` and related bind groups; cheatsheet JSON is generated from them via `lib/to-binds.nix`.
 
 ## Flake structure (dendritic)
@@ -41,8 +41,8 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 - `lib/to-toml.nix`: custom ordered TOML renderer for mango schema
 - `lib/to-binds.nix`: converts bind groups to DMS cheatsheet JSON and to TOML bind tables
 - `lib/mk-ojuny.nix`: builds `mangoConfigFile`, `dmsConfigDir`, `configLinks`, `configLinker`, `mangoWrapper`, `dmsWrapper` from settings; symlinks enabled plugins
-- `lib/mk-linker.nix`: writes `ojuny-config`, which links `configLinks` into the user config directory, seeds `session.json`, touches the DMS first-launch marker, and clears the legacy `~/.config/DankMaterialShell` symlink
-- `lib/mk-mango-wrapper.nix`, `lib/mk-dms-wrapper.nix`: wrapper derivations (mango runs `ojuny-config --links-only` then gets the stable `-c` path; the DMS wrapper supplies the DMS runtime PATH and points the state dir at the store)
+- `lib/mk-linker.nix`: writes `ojuny-config`, which links `configLinks` into the user config directory, seeds `session.json` (also through `--seed`), touches the DMS first-launch marker, and clears the legacy `~/.config/DankMaterialShell` symlink
+- `lib/mk-mango-wrapper.nix`, `lib/mk-dms-wrapper.nix`: wrapper derivations (mango runs `ojuny-config --links-only` then gets the stable `-c` path; the DMS wrapper seeds `session.json` on `dms run` before starting the shell and supplies the DMS runtime PATH)
 - `lib/mk-ghostty-config.nix`: renders the ojuny Ghostty settings and base16 palette into a store config
 - `lib/mk-ghostty-wrapper.nix`: builds `ojuny-ghostty`, which loads the generated config before the user's Ghostty config so user values win
 - `lib/defaults/*.nix`: default mango/DMS/clipboard/plugin values

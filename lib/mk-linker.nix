@@ -22,6 +22,21 @@ pkgs.writeShellApplication {
       mv -Tf "$staging" "$target"
     }
 
+    seed_session() {
+      ${lib.optionalString (dmsSessionFile != null) ''
+        stateHome="''${XDG_STATE_HOME:-$HOME/.local/state}"
+        install -d -m 0755 "$stateHome/DankMaterialShell"
+        if ! cmp -s ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"; then
+          cp ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"
+        fi
+      ''}
+    }
+
+    if [ "''${1:-}" = "--seed" ]; then
+      seed_session
+      exit 0
+    fi
+
     legacyConfig="$configHome/DankMaterialShell"
     if [ -L "$legacyConfig" ]; then
       rm -f "$legacyConfig"
@@ -34,12 +49,6 @@ pkgs.writeShellApplication {
 
     install -d -m 0755 "$configHome/DankMaterialShell"
     touch "$configHome/DankMaterialShell/.firstlaunch"
-    ${lib.optionalString (dmsSessionFile != null) ''
-      stateHome="''${XDG_STATE_HOME:-$HOME/.local/state}"
-      install -d -m 0755 "$stateHome/DankMaterialShell"
-      if ! cmp -s ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"; then
-        cp ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"
-      fi
-    ''}
+    seed_session
   '';
 }

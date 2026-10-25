@@ -150,6 +150,18 @@
         $DRY_RUN_CMD touch "${config.xdg.configHome}/DankMaterialShell/.firstlaunch"
       '';
 
+      systemd.user.services.ojuny-config = {
+        Unit = {
+          Description = "Seed the ojuny DankMaterialShell session";
+        };
+        Service = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${ojuny.configLinker}/bin/ojuny-config --seed";
+        };
+        Install.WantedBy = [ "basic.target" ];
+      };
+
       assertions = [{
         assertion = !cfg.stylix.enable || stylixAvailable;
         message = "desktop.ojuny.stylix.enable requires the stylix module to be imported (e.g. inputs.stylix.homeManagerModules.stylix).";

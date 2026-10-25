@@ -1,4 +1,4 @@
-{ pkgs, dms }:
+{ lib, pkgs, dms, configLinker ? null }:
 pkgs.writeShellApplication {
   name = "dms";
   runtimeInputs = [
@@ -12,6 +12,11 @@ pkgs.writeShellApplication {
     pkgs.khal
   ];
   text = ''
+    ${lib.optionalString (configLinker != null) ''
+      if [ "''${1:-}" = "run" ]; then
+        ${configLinker}/bin/ojuny-config --seed || true
+      fi
+    ''}
     exec ${dms}/bin/dms "$@"
   '';
 }

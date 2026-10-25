@@ -155,6 +155,10 @@
       systemd.user.services.ojuny-config = {
         description = "Link the ojuny desktop configuration into the user config directory";
         wantedBy = [ "basic.target" ];
+        before = [ "systemd-tmpfiles-setup.service" ];
+        unitConfig.DefaultDependencies = false;
+        startLimitIntervalSec = 60;
+        startLimitBurst = 3;
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;

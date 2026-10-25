@@ -63,7 +63,7 @@ let
   };
 
   dmsWrapper = import ./mk-dms-wrapper.nix {
-    inherit pkgs dms;
+    inherit lib pkgs dms configLinker;
   };
 
   mangoWrapper = import ./mk-mango-wrapper.nix {

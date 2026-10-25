@@ -67,6 +67,6 @@ pkgs.writeShellApplication {
     install -d -m 0755 "$XDG_CONFIG_HOME/ghostty"
     ln -sfn ${ghosttyConfig} "$XDG_CONFIG_HOME/ghostty/config"
 
-    exec dbus-run-session -- ${ojuny.mangoWrapper}/bin/ojuny-mango "$@"
+    exec dbus-run-session --config-file=${pkgs.dbus}/share/dbus-1/session.conf -- ${ojuny.mangoWrapper}/bin/ojuny-mango "$@"
   '';
 }
