@@ -17,7 +17,7 @@ from PIL import Image
 WALLPAPERS = Path(__file__).resolve().parent.parent / "wallpapers"
 
 PALETTES = {
-    "catppuccin-floyd": [
+    "floyd": [
         ("303446", "base00"),
         ("cdd6f4", "base05"),
         ("f38ba8", "base08"),
@@ -27,7 +27,7 @@ PALETTES = {
         ("74c7ec", "base0C"),
         ("cba6f7", "base0E"),
     ],
-    "catppuccin-stripes": [
+    "stripes": [
         ("1e1e2e", "base00"),
         ("f38ba8", "base08"),
         ("fab387", "base09"),
@@ -36,7 +36,7 @@ PALETTES = {
         ("74c7ec", "base0C"),
         ("cba6f7", "base0E"),
     ],
-    "catppuccin-waves": [
+    "waves": [
         ("11111b", "base00"),
         ("181825", "base01"),
         ("1e1e2e", "base02"),
@@ -52,7 +52,7 @@ PALETTES = {
         ("cba6f7", "base0E"),
         ("f2cdcd", "base0F"),
     ],
-    "gruvbox-abstract": [
+    "abstract": [
         ("282828", "base00"),
         ("3c3836", "base01"),
         ("504945", "base02"),
@@ -66,7 +66,7 @@ PALETTES = {
         ("458588", "base0D"),
         ("b16286", "base0E"),
     ],
-    "gruvbox-pacman": [
+    "retro": [
         ("282828", "base00"),
         ("3c3836", "base01"),
         ("504945", "base02"),
@@ -81,7 +81,7 @@ PALETTES = {
         ("b16286", "base0E"),
         ("fe8019", "base09"),
     ],
-    "gruvbox-stripes-logo": [
+    "logo": [
         ("282828", "base00"),
         ("3c3836", "base01"),
         ("504945", "base02"),
@@ -95,7 +95,7 @@ PALETTES = {
         ("458588", "base0D"),
         ("b16286", "base0E"),
     ],
-    "nord-city": [
+    "city": [
         ("2e3440", "base00"),
         ("3b4252", "base01"),
         ("434c5e", "base02"),
@@ -113,13 +113,13 @@ PALETTES = {
 }
 
 LABELS = {
-    "catppuccin-floyd": "Catppuccin Floyd",
-    "catppuccin-stripes": "Catppuccin Stripes",
-    "catppuccin-waves": "Catppuccin Waves",
-    "gruvbox-abstract": "Gruvbox Abstract",
-    "gruvbox-pacman": "Gruvbox Pacman",
-    "gruvbox-stripes-logo": "Gruvbox Stripes Logo",
-    "nord-city": "Nord City",
+    "floyd": "Floyd",
+    "stripes": "Stripes",
+    "waves": "Waves",
+    "abstract": "Abstract",
+    "retro": "Retro",
+    "logo": "Logo",
+    "city": "City",
 }
 
 
@@ -138,14 +138,12 @@ def nearest(pixels, palette):
 
 
 def normalize(name, palette):
-    source = WALLPAPERS / f"{name}.png"
-    if not source.exists() and name == "nord-city":
-        source = WALLPAPERS / f"{name}.jpeg"
+    source = WALLPAPERS / f"preset-{name}.png"
     image = np.asarray(Image.open(source).convert("RGB"), dtype=np.float64)
     colors = np.array([parse(color) for color, _ in palette], dtype=np.float64)
     indices = nearest(image.reshape(-1, 3), colors)
     output = colors[indices].round().astype(np.uint8).reshape(image.shape)
-    target = WALLPAPERS / f"{name}.png"
+    target = WALLPAPERS / f"preset-{name}.png"
     Image.fromarray(output, "RGB").save(target, optimize=True)
     used = sorted(set(int(index) for index in indices))
     return [palette[index] for index in used]
@@ -164,7 +162,7 @@ def main():
         print(f"# {LABELS[name]}")
         print(f"    {name} = {{")
         print(f'      label = "{LABELS[name]}";')
-        print(f"      file = ./wallpapers/{name}.png;")
+        print(f"      file = ./wallpapers/preset-{name}.png;")
         print("      fills = [")
         print(nix_fills(entries))
         print("      ];")

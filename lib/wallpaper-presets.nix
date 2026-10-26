@@ -1,7 +1,7 @@
 {
   everforest = {
-    label = "Everforest";
-    file = ./wallpapers/everforest.png;
+    label = "Default";
+    file = ./wallpapers/preset-default.png;
     fills = [
       {
         color = "2e383c";
@@ -34,9 +34,9 @@
     ];
   };
 
-  catppuccin-floyd = {
-    label = "Catppuccin Floyd";
-    file = ./wallpapers/catppuccin-floyd.png;
+  floyd = {
+    label = "Floyd";
+    file = ./wallpapers/preset-floyd.png;
     fills = [
       {
         color = "303446";
@@ -73,9 +73,9 @@
     ];
   };
 
-  catppuccin-stripes = {
-    label = "Catppuccin Stripes";
-    file = ./wallpapers/catppuccin-stripes.png;
+  stripes = {
+    label = "Stripes";
+    file = ./wallpapers/preset-stripes.png;
     fills = [
       {
         color = "1e1e2e";
@@ -108,9 +108,9 @@
     ];
   };
 
-  catppuccin-waves = {
-    label = "Catppuccin Waves";
-    file = ./wallpapers/catppuccin-waves.png;
+  waves = {
+    label = "Waves";
+    file = ./wallpapers/preset-waves.png;
     fills = [
       {
         color = "11111b";
@@ -151,9 +151,9 @@
     ];
   };
 
-  gruvbox-abstract = {
-    label = "Gruvbox Abstract";
-    file = ./wallpapers/gruvbox-abstract.png;
+  abstract = {
+    label = "Abstract";
+    file = ./wallpapers/preset-abstract.png;
     fills = [
       {
         color = "282828";
@@ -198,9 +198,9 @@
     ];
   };
 
-  gruvbox-pacman = {
-    label = "Gruvbox Pacman";
-    file = ./wallpapers/gruvbox-pacman.png;
+  retro = {
+    label = "Retro";
+    file = ./wallpapers/preset-retro.png;
     fills = [
       {
         color = "282828";
@@ -241,9 +241,9 @@
     ];
   };
 
-  gruvbox-stripes-logo = {
-    label = "Gruvbox Stripes Logo";
-    file = ./wallpapers/gruvbox-stripes-logo.png;
+  logo = {
+    label = "Logo";
+    file = ./wallpapers/preset-logo.png;
     fills = [
       {
         color = "282828";
@@ -288,9 +288,9 @@
     ];
   };
 
-  nord-city = {
-    label = "Nord City";
-    file = ./wallpapers/nord-city.png;
+  city = {
+    label = "City";
+    file = ./wallpapers/preset-city.png;
     fills = [
       {
         color = "2e3440";
