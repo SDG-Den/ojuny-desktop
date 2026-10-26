@@ -15,9 +15,11 @@
       mangoDefaults = import ../../lib/defaults/mango.nix;
       dmsDefaults = import ../../lib/defaults/dms.nix;
       stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
+      wallpaperPresets = import ../../lib/wallpaper-presets.nix;
+      preset = wallpaperPresets.${cfg.wallpaper.preset};
       mangoColors = stylixColors.mangoColors;
       fallbackColors = stylixColors.everforestDarkHard;
-      fallbackWallpaper = "${../../lib/wallpapers/everforest.png}";
+      fallbackWallpaper = if cfg.wallpaper.image != null then cfg.wallpaper.image else preset.file;
       fallbackThemeFile = pkgs.writeText "ojuny-dms-everforest-theme.json" (
         builtins.toJSON stylixColors.fallbackTheme
       );
@@ -25,10 +27,22 @@
         builtins.toJSON (stylixColors.dankTheme config.lib.stylix.colors)
       );
       mkWallpaper = import ../../lib/mk-wallpaper.nix { inherit lib pkgs; };
-      stylixWallpaper = mkWallpaper { colors = config.lib.stylix.colors; };
+      stylixWallpaper =
+        if cfg.wallpaper.image != null then
+          cfg.wallpaper.image
+        else if options.stylix.base16Scheme.highestPrio < 1500 then
+          mkWallpaper {
+            base = preset.file;
+            inherit (preset) fills;
+            colors = config.lib.stylix.colors;
+          }
+        else
+          preset.file;
       stylixAvailable = options ? stylix;
       useStylixTheme = cfg.stylix.enable && stylixAvailable;
       useFallbackTheme = !stylixAvailable;
+      sessionWallpaper =
+        if useStylixTheme && config.stylix.image != null then config.stylix.image else fallbackWallpaper;
       pluginDefaults = import ../../lib/mk-plugin-defaults.nix {
         inherit lib;
         registry = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
@@ -161,24 +175,13 @@
             )
           );
 
-          desktop.ojuny.dms.session =
-            lib.mkIf ((useStylixTheme && config.stylix.image != null) || useFallbackTheme)
-              (
-                lib.mkDefault (
-                  if useStylixTheme && config.stylix.image != null then
-                    {
-                      wallpaperPath = config.stylix.image;
-                      wallpaperPathLight = config.stylix.image;
-                      wallpaperPathDark = config.stylix.image;
-                    }
-                  else
-                    {
-                      wallpaperPath = fallbackWallpaper;
-                      wallpaperPathLight = fallbackWallpaper;
-                      wallpaperPathDark = fallbackWallpaper;
-                    }
-                )
-              );
+          desktop.ojuny.dms.session = lib.mkIf (useStylixTheme || useFallbackTheme) (
+            lib.mkDefault {
+              wallpaperPath = sessionWallpaper;
+              wallpaperPathLight = sessionWallpaper;
+              wallpaperPathDark = sessionWallpaper;
+            }
+          );
 
           home.packages = [
             ojuny.mangoWrapper
@@ -217,9 +220,7 @@
           ];
         }
         // lib.optionalAttrs (options ? stylix) {
-          stylix.image = lib.mkIf (cfg.stylix.enable && options.stylix.base16Scheme.highestPrio < 1500) (
-            lib.mkDefault stylixWallpaper
-          );
+          stylix.image = lib.mkIf cfg.stylix.enable (lib.mkDefault stylixWallpaper);
         }
       );
     };

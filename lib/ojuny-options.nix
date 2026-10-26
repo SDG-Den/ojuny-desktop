@@ -3,6 +3,7 @@ let
   mangoDefaults = import ./defaults/mango.nix;
   dmsDefaults = import ./defaults/dms.nix;
   dmsClipboardDefaults = import ./defaults/dms-clipboard.nix;
+  wallpaperPresets = import ./wallpaper-presets.nix;
 
   inherit (lib) mkEnableOption mkOption types;
 
@@ -263,6 +264,19 @@ in
         type = types.toml;
         default = { };
         description = "Additional dankMenu plugin settings merged into plugin_settings.json.";
+      };
+    };
+
+    wallpaper = {
+      preset = mkOption {
+        type = types.enum (builtins.attrNames wallpaperPresets);
+        default = "everforest";
+        description = "Bundled wallpaper preset. The preset artwork is recolored with the active stylix palette.";
+      };
+      image = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = "Custom wallpaper image. When set, it overrides the bundled preset and is used without recoloring.";
       };
     };
 

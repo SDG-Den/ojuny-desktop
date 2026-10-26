@@ -76,6 +76,8 @@ Key options under `desktop.ojuny.*`:
 - `dms.barConfigs`, `dms.dockConfigs`, `dms.controlCenterWidgets`, `dms.dashCards`, `dms.dashTabs`, `dms.dashOptions` — id-keyed convenience options rendered to DMS arrays (order via `_order`)
 - `dankMenu.enable`, `dankMenu.menu.<dotted-id>`, `dankMenu.settings`
 - `stylix.enable` — requires stylix module imported
+- `wallpaper.preset` — bundled wallpaper preset, recolored with the active palette
+- `wallpaper.image` — custom wallpaper path that overrides the preset and is used as-is
 - `defaultApps` — list of packages added to session PATH
 
 ## Notes

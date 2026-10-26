@@ -59,6 +59,7 @@
         nixosModules.default = self.modules.nixos.ojuny-desktop;
         homeManagerModules.default = self.modules.homeManager.ojuny-desktop;
         homeModules.default = self.modules.homeManager.ojuny-desktop;
+        wallpaperPresets = import ./lib/wallpaper-presets.nix;
       };
     };
 }

@@ -57,16 +57,22 @@ for index, color in enumerate(unique_rgb):
     ).astype(np.uint8)
 
 worst_distance = worst**0.5
-print(
-    "unique colors: %d, worst reconstruction distance: %.2f at #%02x%02x%02x"
-    % (
-        len(unique),
-        worst_distance,
-        int(worst_color[0]),
-        int(worst_color[1]),
-        int(worst_color[2]),
-    ),
-    file=sys.stderr,
-)
+if worst_color is None:
+    print(
+        "unique colors: %d, all colors matched exactly" % len(unique),
+        file=sys.stderr,
+    )
+else:
+    print(
+        "unique colors: %d, worst reconstruction distance: %.2f at #%02x%02x%02x"
+        % (
+            len(unique),
+            worst_distance,
+            int(worst_color[0]),
+            int(worst_color[1]),
+            int(worst_color[2]),
+        ),
+        file=sys.stderr,
+    )
 
 Image.fromarray(out_colors[inverse].reshape(image.shape)).save(sys.argv[2])
