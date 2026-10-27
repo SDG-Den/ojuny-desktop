@@ -25,10 +25,17 @@ pkgs.writeShellApplication {
     seed_session() {
       ${lib.optionalString (dmsSessionFile != null) ''
         stateHome="''${XDG_STATE_HOME:-$HOME/.local/state}"
+        target="$stateHome/DankMaterialShell/session.json"
+        stamp="$stateHome/DankMaterialShell/.ojuny-session-source"
+        source=${lib.escapeShellArg dmsSessionFile}
         install -d -m 0755 "$stateHome/DankMaterialShell"
-        if ! cmp -s ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"; then
-          rm -f "$stateHome/DankMaterialShell/session.json"
-          cp ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"
+        if [ -L "$target" ] || [ ! -e "$target" ] || [ "$(cat "$stamp" 2>/dev/null)" != "$source" ]; then
+          rm -f "$target"
+          install -m 0644 "$source" "$target"
+          printf '%s\n' "$source" > "$stamp"
+          chmod 0644 "$stamp"
+        else
+          chmod u+w "$target" 2>/dev/null || true
         fi
       ''}
     }
