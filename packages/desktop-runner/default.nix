@@ -4,6 +4,9 @@
   inputs,
   mangowm,
   dmsPluginRegistry,
+  dgop,
+  dsearch,
+  dankcalendar,
   base16Scheme ? "${pkgs.base16-schemes}/share/themes/everforest-dark-hard.yaml",
   ...
 }:
@@ -50,7 +53,15 @@ let
       plugins = pluginDefaults.defaults;
       dmsClipboard = import ../../lib/defaults/dms-clipboard.nix;
     };
-    extraPackages = with pkgs; [ ghostty ghosttyWrapper firefox nautilus ];
+    extraPackages = with pkgs; [
+      ghostty
+      ghosttyWrapper
+      firefox
+      nautilus
+      dgop
+      dsearch
+      dankcalendar
+    ];
   };
 in
 pkgs.writeShellApplication {

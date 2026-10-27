@@ -105,7 +105,14 @@
           );
         })
       ];
-      desktop.ojuny.defaultApps = lib.mkAfter (with pkgs; [ ghostty firefox nautilus ]);
+      desktop.ojuny.defaultApps = lib.mkAfter [
+        pkgs.ghostty
+        pkgs.firefox
+        pkgs.nautilus
+        inputs.dgop.packages.${pkgs.stdenv.hostPlatform.system}.dgop
+        inputs.danksearch.packages.${pkgs.stdenv.hostPlatform.system}.dsearch
+        inputs.dankcalendar.packages.${pkgs.stdenv.hostPlatform.system}.dankcalendar
+      ];
 
       desktop.ojuny.mango.execOnce = lib.mkAfter [
         "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE NIXOS_OZONE_WL XCURSOR_THEME XCURSOR_SIZE"

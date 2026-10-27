@@ -125,6 +125,9 @@
               ghostty
               firefox
               nautilus
+              inputs.dgop.packages.${pkgs.stdenv.hostPlatform.system}.dgop
+              inputs.danksearch.packages.${pkgs.stdenv.hostPlatform.system}.dsearch
+              inputs.dankcalendar.packages.${pkgs.stdenv.hostPlatform.system}.dankcalendar
             ]
           );
 
