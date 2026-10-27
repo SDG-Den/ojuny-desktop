@@ -271,12 +271,71 @@ in
       preset = mkOption {
         type = types.enum (builtins.attrNames wallpaperPresets);
         default = "everforest";
-        description = "Bundled wallpaper preset. The preset artwork is recolored with the active stylix palette.";
+        description = "Bundled wallpaper preset. Every preset is generated with the active stylix palette.";
       };
       image = mkOption {
         type = types.nullOr types.path;
         default = null;
-        description = "Custom wallpaper image. When set, it overrides the bundled preset and is used without recoloring.";
+        description = "Custom wallpaper image. When set, it overrides the selected preset and is used as-is.";
+      };
+      userDirectory = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = "Directory of user wallpaper images to include in the generated wallpaper directory.";
+      };
+      cycleIncludeBuiltins = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Include the generated bundled presets when DMS cycles through wallpapers.";
+      };
+      set = mkOption {
+        type = types.nullOr types.package;
+        default = null;
+        internal = true;
+        description = "Generated directory holding every themed preset and user wallpaper.";
+      };
+      directory = mkOption {
+        type = types.str;
+        default = "";
+        internal = true;
+        description = "The generated directory DMS reads and cycles through.";
+      };
+      selected = mkOption {
+        type = types.str;
+        default = "";
+        internal = true;
+        description = "The generated path of the selected wallpaper.";
+      };
+      default = mkOption {
+        type = types.str;
+        default = "";
+        internal = true;
+        description = "The generated path of the default preset.";
+      };
+      presets = mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            options = {
+              label = mkOption {
+                type = types.str;
+                description = "Human-readable preset label.";
+              };
+              path = mkOption {
+                type = types.str;
+                description = "Generated path of the themed preset.";
+              };
+            };
+          }
+        );
+        default = { };
+        internal = true;
+        description = "Generated metadata for every bundled preset.";
+      };
+      userWallpapers = mkOption {
+        type = types.attrsOf types.str;
+        default = { };
+        internal = true;
+        description = "Generated paths of user wallpapers, keyed by file name.";
       };
     };
 

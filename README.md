@@ -78,6 +78,8 @@ Key options under `desktop.ojuny.*`:
 - `stylix.enable` — requires stylix module imported
 - `wallpaper.preset` — bundled wallpaper preset, recolored with the active palette
 - `wallpaper.image` — custom wallpaper path that overrides the preset and is used as-is
+- `wallpaper.userDirectory` — directory of user wallpapers copied into the generated wallpaper directory
+- `wallpaper.cycleIncludeBuiltins` — include bundled presets when DMS cycles wallpapers
 - `defaultApps` — list of packages added to session PATH
 
 ## Notes

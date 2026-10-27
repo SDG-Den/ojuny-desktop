@@ -16,33 +16,35 @@
       dmsDefaults = import ../../lib/defaults/dms.nix;
       stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
       wallpaperPresets = import ../../lib/wallpaper-presets.nix;
-      preset = wallpaperPresets.${cfg.wallpaper.preset};
       mangoColors = stylixColors.mangoColors;
       fallbackColors = stylixColors.everforestDarkHard;
-      fallbackWallpaper = if cfg.wallpaper.image != null then cfg.wallpaper.image else preset.file;
       fallbackThemeFile = pkgs.writeText "ojuny-dms-everforest-theme.json" (
         builtins.toJSON stylixColors.fallbackTheme
       );
       stylixThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
         builtins.toJSON (stylixColors.dankTheme config.lib.stylix.colors)
       );
-      mkWallpaper = import ../../lib/mk-wallpaper.nix { inherit lib pkgs; };
-      stylixWallpaper =
-        if cfg.wallpaper.image != null then
-          cfg.wallpaper.image
-        else if options.stylix.base16Scheme.highestPrio < 1500 then
-          mkWallpaper {
-            base = preset.file;
-            inherit (preset) fills;
-            colors = config.lib.stylix.colors;
-          }
-        else
-          preset.file;
       stylixAvailable = options ? stylix;
       useStylixTheme = cfg.stylix.enable && stylixAvailable;
       useFallbackTheme = !stylixAvailable;
+      wallpaperSet = import ../../lib/mk-wallpaper-set.nix { inherit lib pkgs; } {
+        presets = wallpaperPresets;
+        colors =
+          if useStylixTheme && options.stylix.base16Scheme.highestPrio < 1500 then
+            config.lib.stylix.colors
+          else
+            fallbackColors;
+        userDirectory = cfg.wallpaper.userDirectory;
+        selectedPreset = cfg.wallpaper.preset;
+        selectedImage = cfg.wallpaper.image;
+        cycleIncludeBuiltins = cfg.wallpaper.cycleIncludeBuiltins;
+      };
+      stylixWallpaper = wallpaperSet.selected;
       sessionWallpaper =
-        if useStylixTheme && config.stylix.image != null then config.stylix.image else fallbackWallpaper;
+        if useStylixTheme && config.stylix.image != null then
+          config.stylix.image
+        else
+          wallpaperSet.selected;
       pluginDefaults = import ../../lib/mk-plugin-defaults.nix {
         inherit lib;
         registry = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
@@ -180,8 +182,19 @@
               wallpaperPath = sessionWallpaper;
               wallpaperPathLight = sessionWallpaper;
               wallpaperPathDark = sessionWallpaper;
+              wallpaperCyclingFolderPath = wallpaperSet.directory;
+              wallpaperCyclingRecursive = wallpaperSet.recursive;
             }
           );
+
+          desktop.ojuny.wallpaper = {
+            set = wallpaperSet.set;
+            directory = wallpaperSet.directory;
+            selected = wallpaperSet.selected;
+            default = wallpaperSet.default;
+            presets = wallpaperSet.presets;
+            userWallpapers = wallpaperSet.userWallpapers;
+          };
 
           home.packages = [
             ojuny.mangoWrapper

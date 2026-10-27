@@ -7,8 +7,10 @@ All options are under `desktop.ojuny.*`. This document describes every exposed o
 - `desktop.ojuny.enable` (bool, default: false) — Whether to enable Ojuny Desktop (mangoWM + DankMaterialShell).
 - `desktop.ojuny.defaultApps` (listOf package, default: []) — Packages added to the desktop session PATH so default keybinds can launch them.
 - `desktop.ojuny.stylix.enable` (bool, default: false) — Theme mango from imported stylix palette (requires stylix module).
-- `desktop.ojuny.wallpaper.preset` (enum, default: `everforest`) — Bundled wallpaper preset: `everforest`, `floyd`, `stripes`, `waves`, `abstract`, `retro`, `logo`, `city`. The artwork is recolored with the active stylix palette.
-- `desktop.ojuny.wallpaper.image` (path or null, default: null) — Custom wallpaper image. When set, it overrides the preset and is used without recoloring.
+- `desktop.ojuny.wallpaper.preset` (enum, default: `everforest`) — Bundled wallpaper preset: `everforest`, `floyd`, `stripes`, `waves`, `abstract`, `retro`, `logo`, `city`. Every preset is generated with the active stylix palette.
+- `desktop.ojuny.wallpaper.image` (path or null, default: null) — Custom wallpaper image. When set, it overrides the preset and is used as-is.
+- `desktop.ojuny.wallpaper.userDirectory` (path or null, default: null) — Directory of user wallpaper images copied into the generated wallpaper directory.
+- `desktop.ojuny.wallpaper.cycleIncludeBuiltins` (bool, default: true) — Include the generated bundled presets when DMS cycles through wallpapers.
 
 ## mango
 - desktop.ojuny.mango.axisbind (type: see defaults/schema)
