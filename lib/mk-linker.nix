@@ -27,6 +27,7 @@ pkgs.writeShellApplication {
         stateHome="''${XDG_STATE_HOME:-$HOME/.local/state}"
         install -d -m 0755 "$stateHome/DankMaterialShell"
         if ! cmp -s ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"; then
+          rm -f "$stateHome/DankMaterialShell/session.json"
           cp ${lib.escapeShellArg dmsSessionFile} "$stateHome/DankMaterialShell/session.json"
         fi
       ''}

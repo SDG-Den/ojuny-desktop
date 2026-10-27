@@ -19,7 +19,12 @@ targets = np.array(
 if len(fills) != len(targets):
     raise SystemExit("SOURCE_FILLS and TARGET_FILLS must have equal length")
 
-image = np.asarray(Image.open(sys.argv[1]).convert("RGB"), dtype=np.uint8)
+with Image.open(sys.argv[1]) as source:
+    has_alpha = source.mode in ("RGBA", "LA", "PA") or "transparency" in source.info
+    rgba = np.asarray(source.convert("RGBA"), dtype=np.uint8)
+
+image = rgba[..., :3]
+alpha = rgba[..., 3]
 flat = image.reshape(-1, 3).astype(np.uint32)
 keys = (flat[:, 0] << 16) | (flat[:, 1] << 8) | flat[:, 2]
 unique, inverse = np.unique(keys, return_inverse=True)
@@ -75,4 +80,9 @@ else:
         file=sys.stderr,
     )
 
-Image.fromarray(out_colors[inverse].reshape(image.shape)).save(sys.argv[2])
+output = out_colors[inverse].reshape(image.shape)
+if has_alpha:
+    output = np.dstack([output, alpha])
+    Image.fromarray(output, mode="RGBA").save(sys.argv[2])
+else:
+    Image.fromarray(output, mode="RGB").save(sys.argv[2])

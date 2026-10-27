@@ -14,7 +14,7 @@ pkgs.writeShellApplication {
   text = ''
     ${lib.optionalString (configLinker != null) ''
       if [ "''${1:-}" = "run" ]; then
-        ${configLinker}/bin/ojuny-config --seed || true
+        ${configLinker}/bin/ojuny-config --seed
       fi
     ''}
     exec ${dms}/bin/dms "$@"
