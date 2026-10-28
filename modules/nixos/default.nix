@@ -61,6 +61,7 @@
       inherit lib pkgs;
       mango = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.mango;
       dux = inputs.dux-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      quickshell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.quickshell;
       settings = {
         inherit (cfg) mango;
         dux = {

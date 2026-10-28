@@ -35,6 +35,7 @@ let
     inherit lib pkgs;
     mango = mangowm;
     dux = inputs.dux-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    quickshell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.quickshell;
     settings = {
       mango = mangoDefaults // {
         global = mangoDefaults.global // stylixColors.mangoColors colors;

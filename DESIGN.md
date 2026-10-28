@@ -18,6 +18,12 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 - `packages.<system>.default` = nested desktop runner (`packages/desktop-runner/default.nix`).
 - Exports: `nixosModules.default = self.modules.nixos.ojuny-desktop`, `homeManagerModules.default`/`homeModules.default = self.modules.homeManager.ojuny-desktop`.
 
+### nixpkgs policy
+- `ojuny-desktop` carries its own `nixpkgs` input and every other input follows it (`dux-shell`, `dux-plugin-registry`, `dux-gop`, `dux-search`, `dux-calendar`, `dux-greeter`, `dux-files`, `mangowm`, `stylix`, `home-manager`).
+- Consumers keep their own `nixpkgs` for system modules, but leave `inputs.ojuny-desktop.inputs.nixpkgs` unfollowed so the Dux Shell stack builds against this flake's pin even when the consumer runs an older nixpkgs.
+- `quickshell` comes from this flake's nixpkgs as well, because Dux Shell 2.0 requires 0.3.0 or newer; the wrapper asserts the version.
+- No cross-repo lock syncing: each flake resolves one `nixpkgs` node through `inputs.nixpkgs.follows`, so a single `nix flake update nixpkgs` in the repo that owns the pin is the only bump.
+
 ## Option schema
 - `desktop.ojuny.enable` (bool)
 - `desktop.ojuny.mango.global` (TOML/attrs), `env`, `var`, `execOnce`, `exec`, `source`, `rules` (TOML), `binds`, `mousebind`, `axisbind`, `gesturebind` (bind groups)

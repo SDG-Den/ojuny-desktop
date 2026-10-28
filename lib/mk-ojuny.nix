@@ -1,4 +1,4 @@
-{ lib, pkgs, mango, dux, settings, extraPackages ? [ ] }:
+{ lib, pkgs, mango, dux, quickshell ? pkgs.quickshell, settings, extraPackages ? [ ] }:
 let
   mkConfig = (import ./mk-config.nix { inherit lib; }).mkConfig;
   rendered = mkConfig settings;
@@ -68,7 +68,7 @@ let
   };
 
   duxWrapper = import ./mk-dux-wrapper.nix {
-    inherit lib pkgs dux configLinker;
+    inherit lib pkgs dux quickshell configLinker;
   };
 
   mangoWrapper = import ./mk-mango-wrapper.nix {

@@ -1,10 +1,10 @@
-{ lib, pkgs, dux, configLinker ? null }:
-assert lib.versionAtLeast pkgs.quickshell.version "0.3.0";
+{ lib, pkgs, dux, quickshell ? pkgs.quickshell, configLinker ? null }:
+assert lib.versionAtLeast quickshell.version "0.3.0";
 pkgs.writeShellApplication {
   name = "dms";
   runtimeInputs = [
     dux
-    pkgs.quickshell
+    quickshell
     pkgs.shared-mime-info
     pkgs.glib
     pkgs.networkmanager
