@@ -1,4 +1,4 @@
-{ lib, pkgs, configLinks, duxSessionFile ? null }:
+{ lib, pkgs, configLinks, duxSessionFile ? null, changelogMarker ? "" }:
 let
   linkCommands = lib.concatStrings (
     lib.mapAttrsToList (rel: src: ''
@@ -22,6 +22,13 @@ pkgs.writeShellApplication {
       mv -Tf "$staging" "$target"
     }
 
+    mark_changelog_seen() {
+      ${lib.optionalString (changelogMarker != "") ''
+        install -d -m 0755 "$configHome/dms"
+        touch "$configHome/dms/"${lib.escapeShellArg changelogMarker}
+      ''}
+    }
+
     seed_session() {
       ${lib.optionalString (duxSessionFile != null) ''
         stateHome="''${XDG_STATE_HOME:-$HOME/.local/state}"
@@ -42,6 +49,7 @@ pkgs.writeShellApplication {
 
     if [ "''${1:-}" = "--seed" ]; then
       seed_session
+      mark_changelog_seen
       exit 0
     fi
 
@@ -62,5 +70,6 @@ pkgs.writeShellApplication {
     install -d -m 0755 "$configHome/dms"
     touch "$configHome/dms/.firstlaunch"
     seed_session
+    mark_changelog_seen
   '';
 }

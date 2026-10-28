@@ -218,7 +218,10 @@
           ];
 
           desktop.ojuny.dux.session = lib.mkDefault (
-            { configVersion = 7; }
+            {
+              configVersion = 7;
+              wallpaperPath = sessionWallpaper;
+            }
             // lib.optionalAttrs (useStylixTheme || useFallbackTheme) {
               wallpaperPathLight = sessionWallpaper;
               wallpaperPathDark = sessionWallpaper;

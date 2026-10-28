@@ -98,5 +98,14 @@ in
     tab_bar_decorate_focus_fg_color = rgba colors "base06" "ff";
     tab_bar_decorate_focus_bg_color = rgba colors "base02" "ff";
     tab_bar_decorate_border_color = rgba colors "base0D" "ff";
+    title_message_bar_decorate_fg_color = rgba colors "base05" "ff";
+    title_message_bar_decorate_bg_color = rgba colors "base01" "ff";
+    title_message_bar_decorate_focus_fg_color = rgba colors "base06" "ff";
+    title_message_bar_decorate_focus_bg_color = rgba colors "base02" "ff";
+    title_message_bar_decorate_border_color = rgba colors "base0D" "ff";
+    dim_focused_color = rgba colors "base00" "aa";
+    dim_unfocused_color = rgba colors "base00" "dd";
+    group_bar_button_color = rgba colors "base0D" "ff";
+    shadows_color = rgba colors "base00" "80";
   };
 }

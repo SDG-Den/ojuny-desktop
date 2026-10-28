@@ -51,6 +51,7 @@ let
         };
         session = {
           configVersion = 7;
+          wallpaperPath = wallpaper;
           wallpaperPathLight = wallpaper;
           wallpaperPathDark = wallpaper;
         };

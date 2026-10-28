@@ -159,6 +159,30 @@ in
     dwindle_drop_simple_split = 0;
     dwindle_manual_split = 0;
 
+    # layout: monocle and deck
+    monocle_tab_mode = 1;
+    monocle_no_border = 0;
+    monocle_no_gap = 0;
+    monocle_no_radius = 0;
+    monocle_right_button_close = 0;
+    deck_tab_mode = 1;
+
+    # title messages
+    title_message_bar_height = 52;
+    title_message_bar_gap = 20;
+    title_message_bar_decorate_border_width = 0;
+    title_message_bar_decorate_corner_radius = 15;
+    title_message_bar_decorate_padding_x = 0;
+    title_message_bar_decorate_padding_y = 0;
+    title_message_bar_decorate_font_desc = "monospace Bold 13";
+
+    # system behaviour
+    allow_shortcuts_inhibit = 1;
+    auto_reload_config = 1;
+    disable_middle_paste = 0;
+    sync_obj_enable = 1;
+    xwayland_persistence = 1;
+
     # special tag
     special_dim = 0.5;
     special_gap_inner_horizontal = 5;

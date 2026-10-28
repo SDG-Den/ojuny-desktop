@@ -198,7 +198,10 @@
           });
 
       desktop.ojuny.dux.session = perKeyDefaults (
-        { configVersion = 7; }
+        {
+          configVersion = 7;
+          wallpaperPath = sessionWallpaper;
+        }
         // lib.optionalAttrs (useStylixTheme || useFallbackTheme) {
           wallpaperPathLight = sessionWallpaper;
           wallpaperPathDark = sessionWallpaper;

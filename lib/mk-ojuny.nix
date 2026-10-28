@@ -65,6 +65,7 @@ let
 
   configLinker = import ./mk-linker.nix {
     inherit lib pkgs configLinks duxSessionFile;
+    changelogMarker = ".changelog-" + lib.versions.majorMinor (dux.version or "2.0.0");
   };
 
   duxWrapper = import ./mk-dux-wrapper.nix {
