@@ -13,15 +13,21 @@
       toMenuJson = (import ../../lib/dank-menu.nix { inherit lib; }).toMenuJson;
       menuFile = pkgs.writeText "ojuny-dankmenu.json" (toMenuJson cfg.dankMenu.menu);
       mangoDefaults = import ../../lib/defaults/mango.nix;
-      dmsDefaults = import ../../lib/defaults/dms.nix;
+      duxDefaults = import ../../lib/defaults/dux.nix;
+      barPresetDefaults = import ../../lib/defaults/bar-presets.nix;
+      duxFiles = inputs.dux-files.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      fileManager = (import ../../lib/file-manager.nix { inherit lib pkgs; }).resolve {
+        inherit (cfg) fileManager;
+        inherit duxFiles;
+      };
       stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
       wallpaperPresets = import ../../lib/wallpaper-presets.nix;
       mangoColors = stylixColors.mangoColors;
       fallbackColors = stylixColors.everforestDarkHard;
-      fallbackThemeFile = pkgs.writeText "ojuny-dms-everforest-theme.json" (
+      fallbackThemeFile = pkgs.writeText "ojuny-dux-everforest-theme.json" (
         builtins.toJSON stylixColors.fallbackTheme
       );
-      stylixThemeFile = pkgs.writeText "ojuny-dms-stylix-theme.json" (
+      stylixThemeFile = pkgs.writeText "ojuny-dux-stylix-theme.json" (
         builtins.toJSON (stylixColors.dankTheme config.lib.stylix.colors)
       );
       stylixAvailable = options ? stylix;
@@ -47,7 +53,7 @@
           wallpaperSet.selected;
       pluginDefaults = import ../../lib/mk-plugin-defaults.nix {
         inherit lib;
-        registry = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
+        registry = inputs.dux-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
       };
       ghosttyConfig = import ../../lib/mk-ghostty-config.nix {
         inherit lib pkgs;
@@ -60,14 +66,14 @@
       ojuny = import ../../lib/mk-ojuny.nix {
         inherit lib pkgs;
         mango = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.mango;
-        dms = inputs.dms.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        dux = inputs.dux-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
         settings = {
           inherit (cfg) mango;
-          dms = {
-            settings = cfg.dms.settings;
-            session = cfg.dms.session;
-            barConfigs = lib.recursiveUpdate dmsDefaults.barConfigs cfg.dms.barConfigs;
-            inherit (cfg.dms)
+          dux = {
+            settings = cfg.dux.settings;
+            session = cfg.dux.session;
+            barConfigs = lib.recursiveUpdate duxDefaults.barConfigs cfg.dux.barConfigs;
+            inherit (cfg.dux)
               dockConfigs
               controlCenterWidgets
               dashCards
@@ -75,11 +81,11 @@
               dashOptions
               ;
           };
-          dmsClipboard = cfg.dms.clipboardSettings;
-          plugins = cfg.dms.plugins;
-          managePluginSettings = cfg.dms.managePluginSettings;
+          duxClipboard = cfg.dux.clipboardSettings;
+          plugins = cfg.dux.plugins;
+          managePluginSettings = cfg.dux.managePluginSettings;
         };
-        extraPackages = [ ghosttyWrapper ] ++ cfg.defaultApps;
+        extraPackages = [ ghosttyWrapper ] ++ cfg.defaultApps ++ lib.optional (fileManager.package != null) fileManager.package;
       };
 
       sessionScript = pkgs.writeShellApplication {
@@ -98,7 +104,7 @@
         cat > "$out/share/wayland-sessions/ojuny.desktop" <<EOF
         [Desktop Entry]
         Name=Ojuny Desktop
-        Comment=Ojuny Desktop (mangoWM + DankMaterialShell, Home Manager)
+        Comment=Ojuny Desktop (mangoWM + Dux Shell, Home Manager)
         Exec=${sessionScript}/bin/ojuny-hm-session
         TryExec=${sessionScript}/bin/ojuny-hm-session
         Type=Application
@@ -111,7 +117,7 @@
 
       config = lib.mkIf cfg.enable (
         {
-          desktop.ojuny.dms.plugins = lib.mkMerge [
+          desktop.ojuny.dux.plugins = lib.mkMerge [
             pluginDefaults.module
             (lib.mkIf cfg.dankMenu.enable {
               dankMenu.settings = lib.mkDefault (
@@ -124,12 +130,36 @@
             [
               ghostty
               firefox
-              nautilus
-              inputs.dgop.packages.${pkgs.stdenv.hostPlatform.system}.dgop
-              inputs.danksearch.packages.${pkgs.stdenv.hostPlatform.system}.dsearch
-              inputs.dankcalendar.packages.${pkgs.stdenv.hostPlatform.system}.dankcalendar
+              inputs.dux-gop.packages.${pkgs.stdenv.hostPlatform.system}.default
+              inputs.dux-search.packages.${pkgs.stdenv.hostPlatform.system}.default
+              inputs.dux-calendar.packages.${pkgs.stdenv.hostPlatform.system}.default
             ]
           );
+          desktop.ojuny.fileManager.command = fileManager.command;
+          desktop.ojuny.mango.binds = lib.mkDefault (
+            lib.recursiveUpdate mangoDefaults.binds {
+              common.files.args = fileManager.command;
+            }
+          );
+
+          desktop.ojuny.dux.barConfigs =
+            let
+              presetActive = id: id != "none" && cfg.dux.barPreset == id;
+            in
+            lib.mapAttrs' (
+              id: bar:
+              lib.nameValuePair id (lib.mkDefault (
+                bar // {
+                  enabled = presetActive id;
+                  visible = presetActive id;
+                }
+              ))
+            ) (cfg.dux.barPresets // {
+              custom = barPresetDefaults.customBase // {
+                name = "Custom bar";
+                _order = 10;
+              };
+            });
 
           desktop.ojuny.mango.execOnce = lib.mkAfter [
             "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE NIXOS_OZONE_WL XCURSOR_THEME XCURSOR_SIZE"
@@ -158,31 +188,37 @@
             )
           );
 
-          desktop.ojuny.dms.settings = lib.mkIf (useStylixTheme || useFallbackTheme) (
-            lib.mkDefault (
-              dmsDefaults.settings
-              // (
-                if useStylixTheme then
-                  {
-                    currentThemeName = "custom";
-                    customThemeFile = "${stylixThemeFile}";
-                    fontFamily = config.stylix.fonts.sansSerif.name;
-                    monoFontFamily = config.stylix.fonts.monospace.name;
-                    popupTransparency = config.stylix.opacity.popups;
-                    dockTransparency = config.stylix.opacity.desktop;
-                  }
-                else
-                  {
-                    currentThemeName = "custom";
-                    customThemeFile = "${fallbackThemeFile}";
-                  }
+          desktop.ojuny.dux.settings = lib.mkMerge [
+            { frameEnabled = lib.mkDefault (cfg.dux.barPreset == "caelestia"); }
+            (lib.mkIf (useStylixTheme || useFallbackTheme) (
+              lib.mkDefault (
+                duxDefaults.settings
+                // (
+                  if useStylixTheme then
+                    {
+                      currentThemeName = "custom";
+                      customThemeFile = "${stylixThemeFile}";
+                      fontFamily = config.stylix.fonts.sansSerif.name;
+                      monoFontFamily = config.stylix.fonts.monospace.name;
+                      displayFontFamily = config.stylix.fonts.sansSerif.name;
+                      popupTransparency = config.stylix.opacity.popups;
+                    }
+                  else
+                    {
+                      currentThemeName = "custom";
+                      customThemeFile = "${fallbackThemeFile}";
+                    }
+                )
+                // {
+                  lockScreenWallpaperPath = sessionWallpaper;
+                }
               )
-            )
-          );
+            ))
+          ];
 
-          desktop.ojuny.dms.session = lib.mkIf (useStylixTheme || useFallbackTheme) (
-            lib.mkDefault {
-              wallpaperPath = sessionWallpaper;
+          desktop.ojuny.dux.session = lib.mkDefault (
+            { configVersion = 7; }
+            // lib.optionalAttrs (useStylixTheme || useFallbackTheme) {
               wallpaperPathLight = sessionWallpaper;
               wallpaperPathDark = sessionWallpaper;
               wallpaperCyclingFolderPath = wallpaperSet.directory;
@@ -203,7 +239,8 @@
             ojuny.mangoWrapper
             session
           ]
-          ++ cfg.defaultApps;
+          ++ cfg.defaultApps
+          ++ lib.optional (fileManager.package != null) fileManager.package;
 
           services.kdeconnect.enable = lib.mkDefault true;
 
@@ -211,14 +248,40 @@
             rel: src: lib.nameValuePair rel { source = src; }
           ) ojuny.configLinks;
 
-          home.activation.ojunyDmsFirstLaunch = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            $DRY_RUN_CMD install -d -m 0755 "${config.xdg.configHome}/DankMaterialShell"
-            $DRY_RUN_CMD touch "${config.xdg.configHome}/DankMaterialShell/.firstlaunch"
+          home.activation.ojunyDuxFirstLaunch = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            $DRY_RUN_CMD install -d -m 0755 "${config.xdg.configHome}/dms"
+            $DRY_RUN_CMD touch "${config.xdg.configHome}/dms/.firstlaunch"
           '';
+
+          xdg.mime.defaultApplications = lib.mkIf (fileManager.desktopId != null) (lib.mkDefault fileManager.mimeApplications);
+
+          xdg.portal = {
+            extraPortals = lib.mkIf fileManager.portal [ duxFiles ];
+            config.common = lib.mkIf fileManager.portal {
+              "org.freedesktop.impl.portal.FileChooser" = [ "dfiles" ];
+            };
+          };
+
+          systemd.user.services.dfiles = lib.mkIf (cfg.fileManager.enable && cfg.fileManager.package == "dux-files") {
+            Unit = {
+              Description = "Dux Files";
+              Documentation = [ "https://github.com/duxlabs-dev/dux-files" ];
+              After = [ "graphical-session.target" ];
+              PartOf = [ "graphical-session.target" ];
+            };
+            Service = {
+              Type = "simple";
+              ExecStart = "${duxFiles}/bin/dfiles run --session --hidden --keep-running";
+              Restart = "on-failure";
+              RestartSec = 2;
+              Slice = "app.slice";
+            };
+            Install.WantedBy = [ "graphical-session.target" ];
+          };
 
           systemd.user.services.ojuny-config = {
             Unit = {
-              Description = "Seed the ojuny DankMaterialShell session";
+              Description = "Seed the ojuny Dux Shell session";
             };
             Service = {
               Type = "oneshot";

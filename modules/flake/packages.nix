@@ -4,10 +4,11 @@
     packages.default = pkgs.callPackage ../../packages/desktop-runner {
       inherit inputs;
       mangowm = inputs.mangowm.packages.${system}.mango;
-      dmsPluginRegistry = inputs.dms-plugin-registry.packages.${system};
-      dgop = inputs.dgop.packages.${system}.dgop;
-      dsearch = inputs.danksearch.packages.${system}.dsearch;
-      dankcalendar = inputs.dankcalendar.packages.${system}.dankcalendar;
+      duxPluginRegistry = inputs.dux-plugin-registry.packages.${system};
+      duxGop = inputs.dux-gop.packages.${system}.default;
+      duxSearch = inputs.dux-search.packages.${system}.default;
+      duxCalendar = inputs.dux-calendar.packages.${system}.default;
+      duxFiles = inputs.dux-files.packages.${system}.default;
     };
   };
 }

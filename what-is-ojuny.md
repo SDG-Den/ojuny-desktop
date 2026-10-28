@@ -9,9 +9,9 @@ Ojuny will provide the same experience but better, by using nix and by making us
 
 Ojuny will have a layered shape:
 
-- wrapped desktop package providing an ojuny "desktop" package, which provides pre-configured mangoWM and DankMaterial Shell (this repo)
+- wrapped desktop package providing an ojuny "desktop" package, which provides pre-configured mangoWM and Dux Shell (this repo)
 
-- nixos and home-manager module, exposing many options for DMS and mangoWM in different ways (this repo), this is effectively a wrapper module around DankMaterialShell, DMS + plugins, mangoWM and some of my custom nix applications (see ~/repos), settings exposed in a way it can interact with the nix settings gui easily
+- nixos and home-manager module, exposing many options for Dux Shell and mangoWM in different ways (this repo), this is effectively a wrapper module around Dux Shell + plugins, mangoWM and some of my custom nix applications (see ~/repos), settings exposed in a way it can interact with the nix settings gui easily
 
 - template flake in a git repo to be forked, including a setup script to generate hardware.nix and user.nix, this one also is set up to use my nix settings gui (template repo)
 

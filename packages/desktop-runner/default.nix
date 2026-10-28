@@ -3,25 +3,26 @@
   lib,
   inputs,
   mangowm,
-  dmsPluginRegistry,
-  dgop,
-  dsearch,
-  dankcalendar,
+  duxPluginRegistry,
+  duxGop,
+  duxSearch,
+  duxCalendar,
+  duxFiles,
   base16Scheme ? "${pkgs.base16-schemes}/share/themes/everforest-dark-hard.yaml",
   ...
 }:
 let
   mangoDefaults = import ../../lib/defaults/mango.nix;
-  dmsDefaults = import ../../lib/defaults/dms.nix;
+  duxDefaults = import ../../lib/defaults/dux.nix;
   pluginDefaults = import ../../lib/mk-plugin-defaults.nix {
     inherit lib;
-    registry = dmsPluginRegistry;
+    registry = duxPluginRegistry;
   };
   stylixColors = import ../../lib/stylix-colors.nix { inherit lib; };
   base16Lib = inputs.stylix.inputs.base16.lib { inherit pkgs lib; };
   colors = base16Lib.mkSchemeAttrs base16Scheme;
   wallpaper = "${../../lib/wallpapers/preset-default.png}";
-  dmsThemeFile = pkgs.writeText "ojuny-dms-theme.json" (
+  duxThemeFile = pkgs.writeText "ojuny-dux-theme.json" (
     builtins.toJSON (stylixColors.dankTheme colors)
   );
   ghosttyConfig = import ../../lib/mk-ghostty-config.nix { inherit lib pkgs colors; };
@@ -33,34 +34,37 @@ let
   ojuny = import ../../lib/mk-ojuny.nix {
     inherit lib pkgs;
     mango = mangowm;
-    dms = inputs.dms.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    dux = inputs.dux-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
     settings = {
       mango = mangoDefaults // {
         global = mangoDefaults.global // stylixColors.mangoColors colors;
+        binds = lib.recursiveUpdate mangoDefaults.binds {
+          common.files.args = "dfiles open";
+        };
         execOnce = mangoDefaults.execOnce ++ [ "kdeconnectd" ];
       };
-      dms = dmsDefaults // {
-        settings = dmsDefaults.settings // {
+      dux = duxDefaults // {
+        settings = duxDefaults.settings // {
           currentThemeName = "custom";
-          customThemeFile = "${dmsThemeFile}";
+          customThemeFile = "${duxThemeFile}";
         };
         session = {
-          wallpaperPath = wallpaper;
+          configVersion = 7;
           wallpaperPathLight = wallpaper;
           wallpaperPathDark = wallpaper;
         };
       };
       plugins = pluginDefaults.defaults;
-      dmsClipboard = import ../../lib/defaults/dms-clipboard.nix;
+      duxClipboard = import ../../lib/defaults/dux-clipboard.nix;
     };
     extraPackages = with pkgs; [
       ghostty
       ghosttyWrapper
       firefox
-      nautilus
-      dgop
-      dsearch
-      dankcalendar
+      duxGop
+      duxSearch
+      duxCalendar
+      duxFiles
     ];
   };
 in
@@ -71,7 +75,9 @@ pkgs.writeShellApplication {
     root="''${XDG_RUNTIME_DIR:-/tmp}/ojuny-desktop-$$"
     export XDG_CONFIG_HOME="$root/config"
     export XDG_STATE_HOME="$root/state"
-    mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
+    export XDG_CACHE_HOME="$root/cache"
+    export XDG_DATA_HOME="$root/data"
+    mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME"
 
     ${ojuny.configLinker}/bin/ojuny-config
 

@@ -4,13 +4,18 @@ All options are under `desktop.ojuny.*`. This document describes every exposed o
 
 ## Top level
 
-- `desktop.ojuny.enable` (bool, default: false) — Whether to enable Ojuny Desktop (mangoWM + DankMaterialShell).
+- `desktop.ojuny.enable` (bool, default: false) — Whether to enable Ojuny Desktop (mangoWM + Dux Shell).
 - `desktop.ojuny.defaultApps` (listOf package, default: []) — Packages added to the desktop session PATH so default keybinds can launch them.
 - `desktop.ojuny.stylix.enable` (bool, default: false) — Theme mango from imported stylix palette (requires stylix module).
 - `desktop.ojuny.wallpaper.preset` (enum, default: `everforest`) — Bundled wallpaper preset: `everforest`, `floyd`, `stripes`, `waves`, `abstract`, `retro`, `logo`, `city`. Every preset is generated with the active stylix palette.
 - `desktop.ojuny.wallpaper.image` (path or null, default: null) — Custom wallpaper image. When set, it overrides the preset and is used as-is.
 - `desktop.ojuny.wallpaper.userDirectory` (path or null, default: null) — Directory of user wallpaper images copied into the generated wallpaper directory.
-- `desktop.ojuny.wallpaper.cycleIncludeBuiltins` (bool, default: true) — Include the generated bundled presets when DMS cycles through wallpapers.
+- `desktop.ojuny.wallpaper.cycleIncludeBuiltins` (bool, default: true) — Include the generated bundled presets when Dux Shell cycles through wallpapers.
+- `desktop.ojuny.fileManager.enable` (bool, default: true) — Install and wire the selected file manager.
+- `desktop.ojuny.fileManager.package` (enum, default: `dux-files`) — `dux-files`, `nautilus`, or `custom`.
+- `desktop.ojuny.fileManager.customPackage` (package or null, default: null) — Package installed when `package = "custom"`.
+- `desktop.ojuny.fileManager.customCommand` (string, default: `dfiles open`) — Command used by the file-manager keybind when `package = "custom"`.
+- `desktop.ojuny.fileManager.portal` (bool, default: true) — Register the Dux Files FileChooser portal backend when the package is dux-files.
 
 ## mango
 - desktop.ojuny.mango.axisbind (type: see defaults/schema)
@@ -28,7 +33,7 @@ All options are under `desktop.ojuny.*`. This document describes every exposed o
 
 ## `desktop.ojuny.mango.global`
 
-- type: either (attrs; flattened to TOML [global])
+- type: TOML (flattened into [global])
 - description: Mango [global] settings (nested attrs are flattened with underscores). All keys from defaults are supported.
 
 ### Full global keys (from lib/defaults/mango.nix)
@@ -167,7 +172,7 @@ All options are under `desktop.ojuny.*`. This document describes every exposed o
 
 ## `desktop.ojuny.mango.execOnce`
 
-- type: listOf, default: ["dms run", "wl-clip-persist --clipboard both", "wl-paste --type text --watch cliphist store", "wl-paste --type image --watch cliphist store"]
+- type: listOf, default: ["dms run", "wl-clip-persist --clipboard both", "wl-paste --type text --watch cliphist store", "wl-paste --type image --watch cliphist store", "ojuny-ghostty", "ydotoold"]
 - description: Commands run once at startup.
 
 
@@ -179,19 +184,19 @@ All options are under `desktop.ojuny.*`. This document describes every exposed o
 
 ## `desktop.ojuny.mango.var`
 
-- type: either, default: {}
+- type: TOML, default: {}
 - description: Mango [var] variables.
 
 
 ## `desktop.ojuny.mango.env`
 
-- type: either, default: {"MOZ_ENABLE_WAYLAND": "1", "NIXOS_OZONE_WL": "1", "OZONE_PLATFORM": "wayland", "QT_QPA_PLATFORM": "wayland;xcb", "XDG_CURRENT_DESKTOP": "wlroots", "XDG_SESSION_DESKTOP": "wlroots"}
+- type: TOML, default: {"MOZ_ENABLE_WAYLAND": "1", "NIXOS_OZONE_WL": "1", "OZONE_PLATFORM": "wayland", "QT_QPA_PLATFORM": "wayland;xcb", "XDG_CURRENT_DESKTOP": "wlroots", "XDG_SESSION_DESKTOP": "wlroots"}
 - description: Mango [env] variables.
 
 
 ## `desktop.ojuny.mango.rules`
 
-- type: either, default: {"device_rule": [], "layer_rule": [], "monitor_rule": [], "tag_rule": [{"id": 0, "layout_name": "dwindle"}], "window_rule": [{"app_id": "foot", "focused_opacity": 0.7, "unfocused_opacity": 0.7}, {"height": 0.6, "is_floating": 1, "title": "Floating-Menu", "width": 0.6}]}
+- type: TOML, default: {"device_rule": [], "layer_rule": [], "monitor_rule": [], "tag_rule": [{"id": 0, "layout_name": "dwindle"}], "window_rule": [{"app_id": "foot", "focused_opacity": 0.7, "unfocused_opacity": 0.7}, {"height": 0.6, "is_floating": 1, "title": "Floating-Menu", "width": 0.6}]}
 - description: Mango window/tag/layer/monitor/device rules.
 
 
@@ -279,17 +284,17 @@ desktop.ojuny.mango.gesturebind.<mode>.<name> = {
 See `lib/defaults/mango.nix` for the full default bind tree (many modes/entries).
 
 
-## `desktop.ojuny.dms`
+## `desktop.ojuny.dux`
 
-- `desktop.ojuny.dms.settings` (type: either) — DankMaterialShell settings (settings.json) scalar/attr keys. The collection keys are exposed through the convenience options below, which override the same keys here.
-- `desktop.ojuny.dms.barConfigs` (type: attrsOf, default per below) — Bar configurations keyed by id.
-- `desktop.ojuny.dms.dockConfigs` (type: attrsOf, default per below) — Dock configurations keyed by id.
-- `desktop.ojuny.dms.controlCenterWidgets` (type: attrsOf, default per below) — Control-center widgets keyed by id.
-- `desktop.ojuny.dms.dashCards` (type: attrsOf, default per below) — Dashboard cards keyed by id.
-- `desktop.ojuny.dms.dashTabs` (type: attrsOf, default per below) — Dashboard tabs keyed by id.
-- `desktop.ojuny.dms.dashOptions` (type: either, default per below) — Dashboard options; `weather.widgets` is id-keyed.
-- `desktop.ojuny.dms.clipboardSettings` (type: either) — DankMaterialShell clipboard settings (clsettings.json).
-- `desktop.ojuny.dms.managePluginSettings` (type: bool, default: true) — Whether to generate plugin_settings.json from dms.plugins.
+- `desktop.ojuny.dux.settings` (type: TOML) — Dux Shell settings (settings.json) scalar/attr keys. The collection keys are exposed through the convenience options below, which override the same keys here.
+- `desktop.ojuny.dux.barConfigs` (type: attrsOf TOML, default per below) — Bar configurations keyed by id.
+- `desktop.ojuny.dux.dockConfigs` (type: attrsOf TOML, default per below) — Dock configurations keyed by id.
+- `desktop.ojuny.dux.controlCenterWidgets` (type: attrsOf TOML, default per below) — Control-center widgets keyed by id.
+- `desktop.ojuny.dux.dashCards` (type: attrsOf TOML, default per below) — Dashboard cards keyed by id.
+- `desktop.ojuny.dux.dashTabs` (type: attrsOf TOML, default per below) — Dashboard tabs keyed by id.
+- `desktop.ojuny.dux.dashOptions` (type: TOML, default per below) — Dashboard options; `weather.widgets` is id-keyed.
+- `desktop.ojuny.dux.clipboardSettings` (type: TOML) — Dux Shell clipboard settings (clsettings.json).
+- `desktop.ojuny.dux.managePluginSettings` (type: bool, default: true) — Whether to generate plugin_settings.json from dux.plugins.
 
 Ordering and shape for the collection options:
 
@@ -299,12 +304,11 @@ Ordering and shape for the collection options:
 - Nested widget lists (`barConfigs.<id>.leftWidgets`, `barConfigs.<id>.rightWidgets`, `dockConfigs.<id>.widgets`, `dashOptions.weather.widgets`) are also id-keyed attrsets with the same `_order` behaviour.
 - Raw array forms for these keys are ignored when the convenience option is set (the convenience option always wins).
 
-`desktop.ojuny.dms.settings` top-level keys (22):
+`desktop.ojuny.dux.settings` top-level keys (21):
 
 - `animationDuration`
 - `barElevationEnabled`
 - `builtInPluginSettings`
-- `configVersion`
 - `dmsWindowsFloatingSeeded`
 - `launcherStyle`
 - `modalAnimationDuration`
@@ -325,7 +329,7 @@ Ordering and shape for the collection options:
 - `widgetBackgroundColor`
 
 
-## `desktop.ojuny.dms.settings` — Full default structure
+## `desktop.ojuny.dux.settings` — Full default structure
 
 ```nix
 {
@@ -345,9 +349,7 @@ Ordering and shape for the collection options:
       "trigger": "?"
     }
   },
-  "configVersion": 36,
   "dmsWindowsFloatingSeeded": [
-    "mango",
     "mango"
   ],
   "launcherStyle": "island",
@@ -369,7 +371,7 @@ Ordering and shape for the collection options:
   "widgetBackgroundColor": "sch"
 }
 ```
-## `desktop.ojuny.dms.barConfigs` — Full default structure
+## `desktop.ojuny.dux.barConfigs` — Full default structure
 
 attrset keyed by bar id. Nested `leftWidgets`/`rightWidgets` are id-keyed attrsets.
 
@@ -496,7 +498,7 @@ attrset keyed by bar id. Nested `leftWidgets`/`rightWidgets` are id-keyed attrse
 
 Each entry and each widget entry may set `_order` (int, default 1000) to control array order.
 
-## `desktop.ojuny.dms.dockConfigs` — Full default structure
+## `desktop.ojuny.dux.dockConfigs` — Full default structure
 
 attrset keyed by dock id. Nested `widgets` is an id-keyed attrset.
 
@@ -526,6 +528,7 @@ attrset keyed by dock id. Nested `widgets` is an id-keyed attrset.
     "launcherLogoMode": "os",
     "launcherLogoSizeOffset": 0,
     "magnification": false,
+    "magnificationExpand": false,
     "magnificationProfile": "parabolic",
     "magnificationScale": 130,
     "margin": 0,
@@ -574,9 +577,9 @@ attrset keyed by dock id. Nested `widgets` is an id-keyed attrset.
 }
 ```
 
-Note: the DMS field `order` (a list of app ids) is a separate field from `_order`.
+Note: the Dux Shell field `order` (a list of app ids) is a separate field from `_order`.
 
-## `desktop.ojuny.dms.controlCenterWidgets` — Full default structure
+## `desktop.ojuny.dux.controlCenterWidgets` — Full default structure
 
 attrset keyed by widget id.
 
@@ -619,29 +622,36 @@ attrset keyed by widget id.
     "col": 3,
     "enabled": true,
     "h": 1,
-    "mountpath": "/",
+    "mountPath": "/",
     "row": 5,
     "w": 5
   },
   "doNotDisturb": {
     "_order": 150,
-    "col": 4,
+    "col": 1,
     "enabled": true,
-    "footer": true,
-    "footerW": 1,
     "h": 1,
-    "row": 7,
-    "w": 2
+    "row": 6,
+    "small": true,
+    "w": 1
+  },
+  "edit": {
+    "_order": 180,
+    "col": 7,
+    "enabled": true,
+    "h": 1,
+    "row": 6,
+    "small": true,
+    "w": 1
   },
   "idleInhibitor": {
     "_order": 160,
-    "col": 4,
+    "col": 2,
     "enabled": true,
-    "footer": true,
-    "footerW": 1,
     "h": 1,
     "row": 6,
-    "w": 2
+    "small": true,
+    "w": 1
   },
   "inputVolumeSlider": {
     "_order": 80,
@@ -662,13 +672,12 @@ attrset keyed by widget id.
   },
   "nightMode": {
     "_order": 140,
-    "col": 4,
+    "col": 0,
     "enabled": true,
-    "footer": true,
-    "footerW": 1,
     "h": 1,
     "row": 6,
-    "w": 2
+    "small": true,
+    "w": 1
   },
   "plugin_dankKDEConnect": {
     "_order": 120,
@@ -689,9 +698,11 @@ attrset keyed by widget id.
   },
   "runningApps": {
     "_order": 170,
+    "col": 3,
     "enabled": true,
-    "footer": true,
     "h": 1,
+    "row": 6,
+    "small": true,
     "w": 4
   },
   "settings": {
@@ -730,7 +741,7 @@ attrset keyed by widget id.
 }
 ```
 
-## `desktop.ojuny.dms.dashCards` — Full default structure
+## `desktop.ojuny.dux.dashCards` — Full default structure
 
 attrset keyed by card id.
 
@@ -795,7 +806,7 @@ attrset keyed by card id.
 }
 ```
 
-## `desktop.ojuny.dms.dashTabs` — Full default structure
+## `desktop.ojuny.dux.dashTabs` — Full default structure
 
 attrset keyed by tab id.
 
@@ -828,7 +839,7 @@ attrset keyed by tab id.
 }
 ```
 
-## `desktop.ojuny.dms.dashOptions` — Full default structure
+## `desktop.ojuny.dux.dashOptions` — Full default structure
 
 attrset; `weather.widgets` is an id-keyed attrset.
 
@@ -851,7 +862,7 @@ attrset; `weather.widgets` is an id-keyed attrset.
         "tone": "primary",
         "w": 2
       },
-      "daily ": {
+      "daily": {
         "_order": 50,
         "col": 0,
         "forecast": "chart",
@@ -911,15 +922,15 @@ attrset; `weather.widgets` is an id-keyed attrset.
 Each `weather.widgets` entry may set `_order` (int, default 1000).
 
 
-## `desktop.ojuny.dms.plugins`
+## `desktop.ojuny.dux.plugins`
 
 - type: attrsOf (attrsOf plugin), default: {}
-- description: DankMaterialShell plugins, keyed by plugin name.
+- description: Dux Shell plugins, keyed by plugin name.
 
 ### Plugin structure
 
 ```nix
-desktop.ojuny.dms.plugins.<name> = {
+desktop.ojuny.dux.plugins.<name> = {
   enable = false;  # bool
   src = <path or package>;  # required
   settings = {};  # attrs/TOML written to plugin_settings.json
@@ -933,7 +944,7 @@ desktop.ojuny.dms.plugins.<name> = {
 
 - `desktop.ojuny.dankMenu.enable` (type: bool, default: false) — Whether to use a Nix-managed dankMenu menu. The dankMenu plugin itself is enabled by default.
 - `desktop.ojuny.dankMenu.menu` (type: attrsOf, default: {}) — dankMenu tree keyed by dotted id (e.g. "learn.keybinds"). A non-empty tree overrides the plugin's bundled menu through the menuPath setting.
-- `desktop.ojuny.dankMenu.settings` (type: either, default: {}) — Additional dankMenu plugin settings merged into plugin_settings.json.
+- `desktop.ojuny.dankMenu.settings` (type: TOML, default: {}) — Additional dankMenu plugin settings merged into plugin_settings.json.
 
 ### Menu row structure
 
@@ -956,7 +967,7 @@ desktop.ojuny.dankMenu.menu."<dotted-id>" = {
 When `menu` is non-empty and `enable` is true, modules write a generated menu JSON and set `menuPath` in `dankMenu` plugin settings. The plugin uses its bundled menu otherwise.
 
 
-## `desktop.ojuny.dms.clipboardSettings` — Full default structure
+## `desktop.ojuny.dux.clipboardSettings` — Full default structure
 
 ```nix
 {
@@ -976,7 +987,10 @@ When `menu` is non-empty and `enable` is true, modules write a generated menu JS
 - Mango global keys: all keys present in `lib/defaults/mango.nix` are exposed via `desktop.ojuny.mango.global` (flattened into TOML `[global]` by `lib/to-toml.nix`).
 - Mango bind groups (`binds/mousebind/axisbind/gesturebind`): full default tree is in `lib/defaults/mango.nix`; structure is mode -> name -> bind fields as documented.
 - Rules: `desktop.ojuny.mango.rules` is a TOML-typed set; defaults include `tag_rule` and `window_rule` entries as shown.
-- DMS settings: full defaults included above. Collection keys (`barConfigs`, `dockConfigs`, `controlCenterWidgets`, `dashCards`, `dashTabs`, `dashOptions`) are id-keyed attrsets rendered to arrays by `lib/mk-config.nix` (ordered by `_order`); the remaining keys live in `desktop.ojuny.dms.settings`. Clipboard defaults included above (`clsettings.json`).
-- DMS plugins: attrs keyed by plugin name with `enable`, `src` (path/package), `settings` (merged into `plugin_settings.json`), `dir` (plugins/ subdirectory name) and `config` (extra file at `plugins/<dir>/config.json`, e.g. the `nixMonitor` command set).
+- Dux Shell settings: full defaults included above. Collection keys (`barConfigs`, `dockConfigs`, `controlCenterWidgets`, `dashCards`, `dashTabs`, `dashOptions`) are id-keyed attrsets rendered to arrays by `lib/mk-config.nix` (ordered by `_order`); the remaining keys live in `desktop.ojuny.dux.settings`. Clipboard defaults included above (`clsettings.json`). The generated settings fragment omits `configVersion`; Dux Shell treats an unversioned settings file as current.
+- Dux Shell session: generated `session.json` sets `configVersion = 7` and the wallpaper through `wallpaperPathLight` / `wallpaperPathDark`; `wallpaperPath` is no longer written.
+- Dux Shell plugins: attrs keyed by plugin name with `enable`, `src` (path/package), `settings` (merged into `plugin_settings.json`), `dir` (plugins/ subdirectory name) and `config` (extra file at `plugins/<dir>/config.json`, e.g. the `nixMonitor` command set).
 - dankMenu: structured menu rows + extra settings; when menu non-empty, `menuPath` is set automatically.
+- `desktop.ojuny.dms.*` is a renamed-option shim for `desktop.ojuny.dux.*`; it still evaluates with a warning and should not be used in new configuration.
+- File manager: `dux-files` is installed and wired by default (`dev.duxlabs.files.desktop`, FileChooser portal `dfiles`, `dfiles.service`). `nautilus` uses `org.gnome.Nautilus.desktop`; `custom` installs `customPackage`, skips MIME and portal wiring, and uses `customCommand` for the file-manager bind.
 

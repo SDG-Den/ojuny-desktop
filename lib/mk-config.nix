@@ -59,20 +59,40 @@ let
       weather = opts.weather // { widgets = toArray opts.weather.widgets; };
     };
 
-  renderDms =
-    dms:
-    (dms.settings or { })
-    // lib.optionalAttrs (dms.barConfigs or { } != { }) { barConfigs = renderBarConfigs dms.barConfigs; }
-    // lib.optionalAttrs (dms.dockConfigs or { } != { }) { dockConfigs = renderDockConfigs dms.dockConfigs; }
-    // lib.optionalAttrs (dms.controlCenterWidgets or { } != { }) {
-      controlCenterWidgets = toArray dms.controlCenterWidgets;
+  renderDux =
+    dux:
+    (dux.settings or { })
+    // lib.optionalAttrs (dux.barConfigs or { } != { }) { barConfigs = renderBarConfigs dux.barConfigs; }
+    // lib.optionalAttrs (dux.dockConfigs or { } != { }) { dockConfigs = renderDockConfigs dux.dockConfigs; }
+    // lib.optionalAttrs (dux.controlCenterWidgets or { } != { }) {
+      controlCenterWidgets = toArray dux.controlCenterWidgets;
     }
-    // lib.optionalAttrs (dms.dashCards or { } != { }) { dashCards = toArray dms.dashCards; }
-    // lib.optionalAttrs (dms.dashTabs or { } != { }) { dashTabs = toArray dms.dashTabs; }
-    // lib.optionalAttrs (dms.dashOptions or { } != { }) { dashOptions = renderDashOptions dms.dashOptions; };
+    // lib.optionalAttrs (dux.dashCards or { } != { }) { dashCards = toArray dux.dashCards; }
+    // lib.optionalAttrs (dux.dashTabs or { } != { }) { dashTabs = toArray dux.dashTabs; }
+    // lib.optionalAttrs (dux.dashOptions or { } != { }) { dashOptions = renderDashOptions dux.dashOptions; };
 
-  mkConfig = { mango ? { }, dms ? { }, dmsClipboard ? { }, plugins ? { }, ... }:
+  mkConfig =
+    {
+      mango ? { },
+      dux ? null,
+      dms ? null,
+      duxClipboard ? { },
+      dmsClipboard ? { },
+      plugins ? { },
+      ...
+    }:
     let
+      duxSettings = if dux != null then dux else if dms != null then dms else { };
+      clipboard = if duxClipboard != { } then duxClipboard else dmsClipboard;
+      duxJson = builtins.toJSON (renderDux duxSettings);
+      duxSessionJson = builtins.toJSON (duxSettings.session or { });
+      duxClipboardJson = builtins.toJSON clipboard;
+      duxPluginSettingsJson = builtins.toJSON (
+        lib.mapAttrs (name: plugin: { enabled = plugin.enable; } // plugin.settings) (
+          lib.filterAttrs (_: plugin: plugin.enable) plugins
+        )
+      );
+
       global = flattenAttrs (mango.global or { })
         // lib.optionalAttrs (mango.execOnce or [ ] != [ ]) { exec_once = mango.execOnce; }
         // lib.optionalAttrs (mango.exec or [ ] != [ ]) { exec = mango.exec; }
@@ -102,14 +122,16 @@ let
     in
     {
       mangoToml = toTOML sections;
-      dmsJson = builtins.toJSON (renderDms dms);
-      dmsSessionJson = builtins.toJSON (dms.session or { });
-      dmsClipboardJson = builtins.toJSON dmsClipboard;
-      dmsPluginSettingsJson = builtins.toJSON (
-        lib.mapAttrs (name: plugin: { enabled = plugin.enable; } // plugin.settings) (
-          lib.filterAttrs (_: plugin: plugin.enable) plugins
-        )
-      );
+      inherit
+        duxJson
+        duxSessionJson
+        duxClipboardJson
+        duxPluginSettingsJson
+        ;
+      dmsJson = duxJson;
+      dmsSessionJson = duxSessionJson;
+      dmsClipboardJson = duxClipboardJson;
+      dmsPluginSettingsJson = duxPluginSettingsJson;
       cheatsheetJson = builtins.toJSON (
         bindsLib.toCheatsheet (
           map (key: mango.${key} or { }) [
@@ -122,5 +144,6 @@ let
     };
 in
 {
-  inherit mkConfig flattenAttrs renderDms toArray;
+  inherit mkConfig flattenAttrs renderDux toArray;
+  renderDms = renderDux;
 }

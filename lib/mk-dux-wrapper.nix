@@ -1,8 +1,9 @@
-{ lib, pkgs, dms, configLinker ? null }:
+{ lib, pkgs, dux, configLinker ? null }:
+assert lib.versionAtLeast pkgs.quickshell.version "0.3.0";
 pkgs.writeShellApplication {
   name = "dms";
   runtimeInputs = [
-    dms
+    dux
     pkgs.quickshell
     pkgs.shared-mime-info
     pkgs.glib
@@ -17,6 +18,6 @@ pkgs.writeShellApplication {
         ${configLinker}/bin/ojuny-config --seed
       fi
     ''}
-    exec ${dms}/bin/dms "$@"
+    exec ${dux}/bin/dms "$@"
   '';
 }

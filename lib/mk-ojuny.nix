@@ -1,7 +1,12 @@
-{ lib, pkgs, mango, dms, settings, extraPackages ? [ ] }:
+{ lib, pkgs, mango, dux, settings, extraPackages ? [ ] }:
 let
   mkConfig = (import ./mk-config.nix { inherit lib; }).mkConfig;
   rendered = mkConfig settings;
+
+  duxSettings =
+    if (settings.dux or null) != null then settings.dux else settings.dms or { };
+  duxClipboardSettings =
+    if (settings.duxClipboard or null) != null then settings.duxClipboard else settings.dmsClipboard or { };
 
   enabledPlugins = lib.filterAttrs (_: plugin: plugin.enable) (settings.plugins or { });
 
@@ -14,7 +19,7 @@ let
     if config == { } then
       plugin.src
     else
-      pkgs.runCommand "ojuny-dms-plugin-${pluginDir name plugin}" { } ''
+      pkgs.runCommand "ojuny-dux-plugin-${pluginDir name plugin}" { } ''
         mkdir -p "$out"
         cp -r ${plugin.src}/. "$out/"
         cp ${pkgs.writeText "config.json" (builtins.toJSON config)} "$out/config.json"
@@ -22,52 +27,52 @@ let
 
   mangoConfigFile = pkgs.writeText "ojuny.toml" rendered.mangoToml;
 
-  dmsConfigDir = pkgs.runCommand "ojuny-dms-config" { } ''
-    mkdir -p "$out/DankMaterialShell/config.d" "$out/DankMaterialShell/cheatsheets" "$out/DankMaterialShell/plugins"
-    cp ${pkgs.writeText "settings.json" rendered.dmsJson} "$out/DankMaterialShell/config.d/00-ojuny.json"
-    cp ${pkgs.writeText "binds.json" rendered.cheatsheetJson} "$out/DankMaterialShell/cheatsheets/binds.json"
-    ${lib.optionalString (settings.dmsClipboard or { } != { }) ''
-      cp ${pkgs.writeText "clsettings.json" rendered.dmsClipboardJson} "$out/DankMaterialShell/clsettings.json"
+  duxConfigDir = pkgs.runCommand "ojuny-dux-config" { } ''
+    mkdir -p "$out/dms/config.d" "$out/dms/cheatsheets" "$out/dms/plugins"
+    cp ${pkgs.writeText "settings.json" rendered.duxJson} "$out/dms/config.d/00-ojuny.json"
+    cp ${pkgs.writeText "binds.json" rendered.cheatsheetJson} "$out/dms/cheatsheets/binds.json"
+    ${lib.optionalString (duxClipboardSettings != { }) ''
+      cp ${pkgs.writeText "clsettings.json" rendered.duxClipboardJson} "$out/dms/clsettings.json"
     ''}
     ${lib.optionalString (settings.managePluginSettings or true) ''
-      cp ${pkgs.writeText "plugin_settings.json" rendered.dmsPluginSettingsJson} "$out/DankMaterialShell/plugin_settings.json"
+      cp ${pkgs.writeText "plugin_settings.json" rendered.duxPluginSettingsJson} "$out/dms/plugin_settings.json"
     ''}
     ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (name: plugin: ''ln -s ${pluginSource name plugin} "$out/DankMaterialShell/plugins/${pluginDir name plugin}"'') enabledPlugins
+      lib.mapAttrsToList (name: plugin: ''ln -s ${pluginSource name plugin} "$out/dms/plugins/${pluginDir name plugin}"'') enabledPlugins
     )}
   '';
 
   configLinks = {
     "mango/ojuny.toml" = mangoConfigFile;
-    "DankMaterialShell/config.d/00-ojuny.json" = "${dmsConfigDir}/DankMaterialShell/config.d/00-ojuny.json";
-    "DankMaterialShell/cheatsheets/binds.json" = "${dmsConfigDir}/DankMaterialShell/cheatsheets/binds.json";
+    "dms/config.d/00-ojuny.json" = "${duxConfigDir}/dms/config.d/00-ojuny.json";
+    "dms/cheatsheets/binds.json" = "${duxConfigDir}/dms/cheatsheets/binds.json";
   }
-  // lib.optionalAttrs (settings.dmsClipboard or { } != { }) {
-    "DankMaterialShell/clsettings.json" = "${dmsConfigDir}/DankMaterialShell/clsettings.json";
+  // lib.optionalAttrs (duxClipboardSettings != { }) {
+    "dms/clsettings.json" = "${duxConfigDir}/dms/clsettings.json";
   }
   // lib.optionalAttrs (settings.managePluginSettings or true) {
-    "DankMaterialShell/plugin_settings.json" = "${dmsConfigDir}/DankMaterialShell/plugin_settings.json";
+    "dms/plugin_settings.json" = "${duxConfigDir}/dms/plugin_settings.json";
   }
   // lib.mapAttrs' (
-    name: plugin: lib.nameValuePair "DankMaterialShell/plugins/${pluginDir name plugin}" "${dmsConfigDir}/DankMaterialShell/plugins/${pluginDir name plugin}"
+    name: plugin: lib.nameValuePair "dms/plugins/${pluginDir name plugin}" "${duxConfigDir}/dms/plugins/${pluginDir name plugin}"
   ) enabledPlugins;
 
-  dmsSessionFile =
-    if (settings.dms.session or { }) == { } then
+  duxSessionFile =
+    if (duxSettings.session or { }) == { } then
       null
     else
-      pkgs.writeText "ojuny-dms-session.json" rendered.dmsSessionJson;
+      pkgs.writeText "ojuny-dux-session.json" rendered.duxSessionJson;
 
   configLinker = import ./mk-linker.nix {
-    inherit lib pkgs configLinks dmsSessionFile;
+    inherit lib pkgs configLinks duxSessionFile;
   };
 
-  dmsWrapper = import ./mk-dms-wrapper.nix {
-    inherit lib pkgs dms configLinker;
+  duxWrapper = import ./mk-dux-wrapper.nix {
+    inherit lib pkgs dux configLinker;
   };
 
   mangoWrapper = import ./mk-mango-wrapper.nix {
-    inherit lib pkgs mango configLinker dmsWrapper;
+    inherit lib pkgs mango configLinker duxWrapper;
     runtimeInputs = with pkgs; [
       wl-clipboard
       wl-clip-persist
@@ -88,5 +93,8 @@ let
   };
 in
 {
-  inherit mangoWrapper dmsWrapper mangoConfigFile dmsConfigDir configLinks configLinker dmsSessionFile;
+  inherit mangoWrapper duxWrapper mangoConfigFile duxConfigDir configLinks configLinker duxSessionFile;
+  dmsWrapper = duxWrapper;
+  dmsConfigDir = duxConfigDir;
+  dmsSessionFile = duxSessionFile;
 }

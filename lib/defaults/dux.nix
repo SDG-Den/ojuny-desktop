@@ -1,5 +1,5 @@
 {
-  # DMS settings. Scalar/attr keys live in `settings`; the collection keys
+  # Dux Shell settings. Scalar/attr keys live in `settings`; the collection keys
   # (barConfigs, dockConfigs, controlCenterWidgets, dashCards, dashTabs,
   # dashOptions) are stored as attrs keyed by id with an extra `_order`
   # field and are rendered back to arrays by lib/mk-config.nix.
@@ -21,8 +21,7 @@
           trigger = "?";
         };
       };
-      configVersion = 36;
-      dmsWindowsFloatingSeeded = [ "mango" "mango" ];
+      dmsWindowsFloatingSeeded = [ "mango" ];
       launcherStyle = "island";
       modalAnimationDuration = 231;
       motionEffect = 1;
@@ -62,18 +61,11 @@
         innerPadding = 0;
         island = true;
         islandCompactThickness = 31;
-        islandGothCornerRadiusOverride = false;
-        islandGothCornerRadiusValue = 20;
-        islandGothCornersEnabled = false;
-        islandHoverCloseDelay = 350;
         islandHoverOpenDelay = 350;
+        islandHoverCloseDelay = 350;
         islandOuterGap = 3;
         islandSatelliteGap = 8;
         islandSatelliteHoverGap = 5;
-        islandSatelliteHoverSize = 30;
-        islandSatelliteHoverSizeExpanded = 24;
-        islandSatelliteSize = 26;
-        islandSatelliteSizeExpanded = 20;
         islandWidgetOutlineColor = "surfaceText";
         islandWidgetOutlineEnabled = true;
         islandWidgetOutlineOpacity = 0.5;
@@ -181,6 +173,7 @@
         launcherLogoMode = "os";
         launcherLogoSizeOffset = 0;
         magnification = false;
+        magnificationExpand = false;
         magnificationProfile = "parabolic";
         magnificationScale = 130;
         margin = 0;
@@ -330,47 +323,55 @@
         col = 3;
         enabled = true;
         h = 1;
-        mountpath = "/";
+        mountPath = "/";
         row = 5;
         w = 5;
         _order = 130;
       };
       nightMode = {
-        col = 4;
+        col = 0;
         enabled = true;
-        footer = true;
-        footerW = 1;
         h = 1;
         row = 6;
-        w = 2;
+        small = true;
+        w = 1;
         _order = 140;
       };
       doNotDisturb = {
-        col = 4;
+        col = 1;
         enabled = true;
-        footer = true;
-        footerW = 1;
         h = 1;
-        row = 7;
-        w = 2;
+        row = 6;
+        small = true;
+        w = 1;
         _order = 150;
       };
       idleInhibitor = {
-        col = 4;
+        col = 2;
         enabled = true;
-        footer = true;
-        footerW = 1;
         h = 1;
         row = 6;
-        w = 2;
+        small = true;
+        w = 1;
         _order = 160;
       };
       runningApps = {
+        col = 3;
         enabled = true;
-        footer = true;
         h = 1;
+        row = 6;
+        small = true;
         w = 4;
         _order = 170;
+      };
+      edit = {
+        col = 7;
+        enabled = true;
+        h = 1;
+        row = 6;
+        small = true;
+        w = 1;
+        _order = 180;
       };
     };
     dashCards = {
@@ -501,7 +502,7 @@
             w = 1;
             _order = 40;
           };
-          "daily " = {
+          "daily" = {
             col = 0;
             forecast = "chart";
             h = 2;

@@ -319,7 +319,7 @@ in
         modifier = [ "SUPER" ];
         keys = [ "E" ];
         dispatcher = "spawn";
-        args = "nautilus --new-window";
+        args = "dfiles open";
         description = "Open files";
         group = "Applications";
         subcat = "Launch";

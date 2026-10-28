@@ -1,5 +1,5 @@
 {
-  description = "Ojuny Desktop - pre-configured mangoWM + DankMaterialShell";
+  description = "Ojuny Desktop - pre-configured mangoWM + Dux Shell";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -19,28 +19,38 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell";
+    dux-shell = {
+      url = "github:duxlabs-dev/dux-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dms-plugin-registry = {
-      url = "github:AvengeMedia/dms-plugin-registry";
+    dux-plugin-registry = {
+      url = "github:duxlabs-dev/dux-plugin-registry";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dgop = {
-      url = "github:AvengeMedia/dgop";
+    dux-gop = {
+      url = "github:duxlabs-dev/dux-gop";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    danksearch = {
-      url = "github:AvengeMedia/danksearch";
+    dux-search = {
+      url = "github:duxlabs-dev/dux-search";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dankcalendar = {
-      url = "github:AvengeMedia/dankcalendar";
+    dux-calendar = {
+      url = "github:duxlabs-dev/dux-calendar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    dux-greeter = {
+      url = "github:duxlabs-dev/dux-greeter";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    dux-files = {
+      url = "github:duxlabs-dev/dux-files";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -75,6 +85,7 @@
         homeManagerModules.default = self.modules.homeManager.ojuny-desktop;
         homeModules.default = self.modules.homeManager.ojuny-desktop;
         wallpaperPresets = import ./lib/wallpaper-presets.nix;
+        barPresets = import ./lib/defaults/bar-presets.nix;
       };
     };
 }

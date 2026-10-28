@@ -1,8 +1,9 @@
 { lib, ... }:
 let
   mangoDefaults = import ./defaults/mango.nix;
-  dmsDefaults = import ./defaults/dms.nix;
-  dmsClipboardDefaults = import ./defaults/dms-clipboard.nix;
+  duxDefaults = import ./defaults/dux.nix;
+  duxClipboardDefaults = import ./defaults/dux-clipboard.nix;
+  barPresetsDefaults = import ./defaults/bar-presets.nix;
   wallpaperPresets = import ./wallpaper-presets.nix;
 
   inherit (lib) mkEnableOption mkOption types;
@@ -102,7 +103,7 @@ let
 in
 {
   options.desktop.ojuny = {
-    enable = mkEnableOption "Ojuny Desktop (mangoWM + DankMaterialShell)";
+    enable = mkEnableOption "Ojuny Desktop (mangoWM + Dux Shell)";
 
     mango = {
       global = mkOption {
@@ -162,56 +163,67 @@ in
       };
     };
 
-    dms = {
+    dux = {
       settings = mkOption {
         type = types.toml;
-        default = dmsDefaults.settings;
-        description = "DankMaterialShell settings (settings.json). Use the convenience options below for the collection keys (barConfigs, dockConfigs, controlCenterWidgets, dashCards, dashTabs, dashOptions); they override the same keys here.";
+        default = duxDefaults.settings;
+        description = "Dux Shell settings (settings.json). Use the convenience options below for the collection keys (barConfigs, dockConfigs, controlCenterWidgets, dashCards, dashTabs, dashOptions); they override the same keys here.";
       };
       session = mkOption {
         type = types.toml;
         default = { };
-        description = "DankMaterialShell session (session.json seeded into the XDG state directory at login). `wallpaperPath`, `wallpaperPathLight` and `wallpaperPathDark` set the shell wallpaper.";
+        description = "Dux Shell session (session.json seeded into the XDG state directory at login). `wallpaperPathLight` and `wallpaperPathDark` set the shell wallpaper.";
       };
       barConfigs = mkOption {
         type = types.attrsOf types.toml;
-        default = dmsDefaults.barConfigs;
+        default = duxDefaults.barConfigs;
         description = "Bar configurations keyed by id. Each entry may set `_order` (int, default 1000) to control the generated array order.";
+      };
+      barPreset = mkOption {
+        type = types.enum ((builtins.attrNames barPresetsDefaults.presets) ++ [ "custom" ]);
+        default = "default";
+        description = "Active bar preset. `custom` uses `barConfigs.custom`, so a downstream repo can override it.";
+      };
+      barPresets = mkOption {
+        type = types.attrsOf types.toml;
+        default = barPresetsDefaults.presets;
+        internal = true;
+        description = "Bundled bar definitions keyed by preset id. `lib/defaults/bar-presets.nix` is the source of truth.";
       };
       dockConfigs = mkOption {
         type = types.attrsOf types.toml;
-        default = dmsDefaults.dockConfigs;
+        default = duxDefaults.dockConfigs;
         description = "Dock configurations keyed by id. Each entry may set `_order` (int, default 1000). Nested `widgets` is itself an id-keyed attrset (with optional `_order`).";
       };
       controlCenterWidgets = mkOption {
         type = types.attrsOf types.toml;
-        default = dmsDefaults.controlCenterWidgets;
+        default = duxDefaults.controlCenterWidgets;
         description = "Control-center widgets keyed by id. Each entry may set `_order` (int, default 1000).";
       };
       dashCards = mkOption {
         type = types.attrsOf types.toml;
-        default = dmsDefaults.dashCards;
+        default = duxDefaults.dashCards;
         description = "Dashboard cards keyed by id. Each entry may set `_order` (int, default 1000).";
       };
       dashTabs = mkOption {
         type = types.attrsOf types.toml;
-        default = dmsDefaults.dashTabs;
+        default = duxDefaults.dashTabs;
         description = "Dashboard tabs keyed by id. Each entry may set `_order` (int, default 1000).";
       };
       dashOptions = mkOption {
         type = types.toml;
-        default = dmsDefaults.dashOptions;
+        default = duxDefaults.dashOptions;
         description = "Dashboard options. `weather.widgets` is an id-keyed attrset (with optional `_order`).";
       };
       clipboardSettings = mkOption {
         type = types.toml;
-        default = dmsClipboardDefaults;
-        description = "DankMaterialShell clipboard settings (clsettings.json).";
+        default = duxClipboardDefaults;
+        description = "Dux Shell clipboard settings (clsettings.json).";
       };
       managePluginSettings = mkOption {
         type = types.bool;
         default = true;
-        description = "Whether to generate plugin_settings.json from dms.plugins.";
+        description = "Whether to generate plugin_settings.json from dux.plugins.";
       };
       plugins = mkOption {
         type = types.attrsOf (types.submodule {
@@ -233,7 +245,7 @@ in
             dir = mkOption {
               type = types.str;
               default = "";
-              description = "Directory name under plugins/ for this plugin's source. Empty means use the attribute key (the DMS plugin id). Set only when the plugin expects a different directory name.";
+              description = "Directory name under plugins/ for this plugin's source. Empty means use the attribute key (the Dux Shell plugin id). Set only when the plugin expects a different directory name.";
             };
             config = mkOption {
               type = types.toml;
@@ -243,7 +255,41 @@ in
           };
         });
         default = { };
-        description = "DankMaterialShell plugins, keyed by plugin name.";
+        description = "Dux Shell plugins, keyed by plugin name.";
+      };
+    };
+
+    fileManager = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Whether to install and wire the selected file manager.";
+      };
+      package = mkOption {
+        type = types.enum [ "dux-files" "nautilus" "custom" ];
+        default = "dux-files";
+        description = "File manager to install. `custom` installs `customPackage` and uses `customCommand` without MIME or portal wiring.";
+      };
+      customPackage = mkOption {
+        type = types.nullOr types.package;
+        default = null;
+        description = "Package installed when `package = \"custom\"`.";
+      };
+      customCommand = mkOption {
+        type = types.str;
+        default = "dfiles open";
+        description = "Command run by the file-manager keybind when `package = \"custom\"`.";
+      };
+      portal = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Register the Dux Files FileChooser portal backend when the selected package is dux-files.";
+      };
+      command = mkOption {
+        type = types.str;
+        internal = true;
+        default = "";
+        description = "Resolved command that opens the selected file manager.";
       };
     };
 
@@ -286,7 +332,7 @@ in
       cycleIncludeBuiltins = mkOption {
         type = types.bool;
         default = true;
-        description = "Include the generated bundled presets when DMS cycles through wallpapers.";
+        description = "Include the generated bundled presets when Dux Shell cycles through wallpapers.";
       };
       set = mkOption {
         type = types.nullOr types.package;
@@ -298,7 +344,7 @@ in
         type = types.str;
         default = "";
         internal = true;
-        description = "The generated directory DMS reads and cycles through.";
+        description = "The generated directory Dux Shell reads and cycles through.";
       };
       selected = mkOption {
         type = types.str;

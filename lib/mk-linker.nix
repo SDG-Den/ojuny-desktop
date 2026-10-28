@@ -1,4 +1,4 @@
-{ lib, pkgs, configLinks, dmsSessionFile ? null }:
+{ lib, pkgs, configLinks, duxSessionFile ? null }:
 let
   linkCommands = lib.concatStrings (
     lib.mapAttrsToList (rel: src: ''
@@ -23,12 +23,12 @@ pkgs.writeShellApplication {
     }
 
     seed_session() {
-      ${lib.optionalString (dmsSessionFile != null) ''
+      ${lib.optionalString (duxSessionFile != null) ''
         stateHome="''${XDG_STATE_HOME:-$HOME/.local/state}"
-        target="$stateHome/DankMaterialShell/session.json"
-        stamp="$stateHome/DankMaterialShell/.ojuny-session-source"
-        source=${lib.escapeShellArg dmsSessionFile}
-        install -d -m 0755 "$stateHome/DankMaterialShell"
+        target="$stateHome/dms/session.json"
+        stamp="$stateHome/dms/.ojuny-session-source"
+        source=${lib.escapeShellArg duxSessionFile}
+        install -d -m 0755 "$stateHome/dms"
         if [ -L "$target" ] || [ ! -e "$target" ] || [ "$(cat "$stamp" 2>/dev/null)" != "$source" ]; then
           rm -f "$target"
           install -m 0644 "$source" "$target"
@@ -47,7 +47,11 @@ pkgs.writeShellApplication {
 
     legacyConfig="$configHome/DankMaterialShell"
     if [ -L "$legacyConfig" ]; then
-      rm -f "$legacyConfig"
+      legacyTarget="$(readlink -f "$legacyConfig" 2>/dev/null || true)"
+      dmsTarget="$(readlink -f "$configHome/dms" 2>/dev/null || true)"
+      if [ "$legacyTarget" != "$dmsTarget" ]; then
+        rm -f "$legacyConfig"
+      fi
     fi
 
     ${linkCommands}
@@ -55,8 +59,8 @@ pkgs.writeShellApplication {
       exit 0
     fi
 
-    install -d -m 0755 "$configHome/DankMaterialShell"
-    touch "$configHome/DankMaterialShell/.firstlaunch"
+    install -d -m 0755 "$configHome/dms"
+    touch "$configHome/dms/.firstlaunch"
     seed_session
   '';
 }
