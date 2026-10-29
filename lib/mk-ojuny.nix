@@ -16,14 +16,16 @@ let
     let
       config = plugin.config or { };
     in
-    if config == { } then
-      plugin.src
-    else
-      pkgs.runCommand "ojuny-dux-plugin-${pluginDir name plugin}" { } ''
-        mkdir -p "$out"
-        cp -r ${plugin.src}/. "$out/"
+    pkgs.runCommand "ojuny-dux-plugin-${pluginDir name plugin}" { } ''
+      mkdir -p "$out"
+      cp -r ${plugin.src}/. "$out/"
+      chmod -R u+w "$out"
+      ${lib.optionalString (config != { }) ''
         cp ${pkgs.writeText "config.json" (builtins.toJSON config)} "$out/config.json"
-      '';
+      ''}
+      find "$out" -name '*.qml' -print0 | ${pkgs.findutils}/bin/xargs -0 -r \
+        ${pkgs.gnused}/bin/sed -i 's#/.config/DankMaterialShell/#/.config/dms/#g'
+    '';
 
   mangoConfigFile = pkgs.writeText "ojuny.toml" rendered.mangoToml;
 
