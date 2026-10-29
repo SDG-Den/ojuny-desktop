@@ -136,6 +136,7 @@
               inputs.dux-gop.packages.${pkgs.stdenv.hostPlatform.system}.default
               inputs.dux-search.packages.${pkgs.stdenv.hostPlatform.system}.default
               inputs.dux-calendar.packages.${pkgs.stdenv.hostPlatform.system}.default
+              self.packages.${pkgs.stdenv.hostPlatform.system}.ojuny-WinMenu
             ]
           );
           desktop.ojuny.fileManager.command = fileManager.command;

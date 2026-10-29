@@ -10,5 +10,7 @@
       duxCalendar = inputs.dux-calendar.packages.${system}.default;
       duxFiles = inputs.dux-files.packages.${system}.default;
     };
+
+    packages.ojuny-WinMenu = pkgs.callPackage ../../packages/ojuny-winmenu { };
   };
 }
