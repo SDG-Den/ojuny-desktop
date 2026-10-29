@@ -1,7 +1,6 @@
 let
   pasteScript = builtins.path { name = "paste.sh"; path = ../scripts/paste.sh; };
   layoutbuttonScript = builtins.path { name = "layoutbutton.sh"; path = ../scripts/layoutbutton.sh; };
-  projectsScript = builtins.path { name = "projects.sh"; path = ../scripts/projects.sh; };
 in
 {
   global = {
@@ -375,16 +374,6 @@ in
         group = "Applications";
         subcat = "Launch";
       };
-      projects = {
-        modifier = [ "SUPER" "SHIFT" ];
-        keys = [ "Tab" ];
-        dispatcher = "spawn_shell";
-        args = "ojuny-ghostty --title='Floating-Menu' -e ${projectsScript}";
-        description = "Open projects (script pending)";
-        group = "Applications";
-        subcat = "Launch";
-      };
-
       # Windows / Management
       close = {
         modifier = [ "SUPER" ];
