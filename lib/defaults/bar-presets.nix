@@ -319,12 +319,13 @@ let
     widgetPadding = 0;
     widgetStyle = "pills";
     widgetTransparency = 1;
+    rightClickAction = "none";
   };
 in
 {
   customBase = defaultBar;
 
-  presets = {
+  presets = builtins.mapAttrs (_: preset: preset // { rightClickAction = "none"; }) {
     default = {
       name = "Default";
       _order = 5;

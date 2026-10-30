@@ -136,12 +136,12 @@
         in
         lib.mapAttrs' (
           id: bar:
-          lib.nameValuePair id (lib.mkDefault (
+          lib.nameValuePair id (
             bar // {
               enabled = presetActive id;
               visible = presetActive id;
             }
-          ))
+          )
         ) (cfg.dux.barPresets // {
           custom = barPresetDefaults.customBase // {
             name = "Custom bar";
