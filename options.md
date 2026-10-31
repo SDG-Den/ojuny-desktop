@@ -214,9 +214,12 @@ desktop.ojuny.mango.binds.<mode>.<name> = {
   dispatcher = "spawn";    # string
   args = [] or "...";       # list or string
   description = "...";     # string
+  group = "System";        # string (cheatsheet top-level category, default "Other")
   subcat = "General";      # string
 };
 ```
+
+`group` is the cheatsheet's top-level category (default `Other`); `subcat` sorts entries within that group. Both are read by `lib/to-binds.nix`.
 
 See `lib/defaults/mango.nix` for the full default bind tree (many modes/entries).
 
@@ -235,6 +238,7 @@ desktop.ojuny.mango.mousebind.<mode>.<name> = {
   dispatcher = "spawn";    # string
   args = [] or "...";       # list or string
   description = "...";     # string
+  group = "System";        # string (cheatsheet top-level category, default "Other")
   subcat = "General";      # string
 };
 ```
@@ -256,6 +260,7 @@ desktop.ojuny.mango.axisbind.<mode>.<name> = {
   dispatcher = "spawn";    # string
   args = [] or "...";       # list or string
   description = "...";     # string
+  group = "System";        # string (cheatsheet top-level category, default "Other")
   subcat = "General";      # string
 };
 ```
@@ -277,6 +282,7 @@ desktop.ojuny.mango.gesturebind.<mode>.<name> = {
   dispatcher = "spawn";    # string
   args = [] or "...";       # list or string
   description = "...";     # string
+  group = "System";        # string (cheatsheet top-level category, default "Other")
   subcat = "General";      # string
 };
 ```

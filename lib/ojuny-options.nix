@@ -304,7 +304,12 @@ in
       menu = mkOption {
         type = types.attrsOf menuRowModule;
         default = { };
-        description = "dankMenu tree keyed by dotted id (e.g. \"learn.keybinds\"). A non-empty tree overrides the plugin's bundled menu through the menuPath setting.";
+        description = "dankMenu tree keyed by dotted id (e.g. \"learn.keybinds\"). A non-empty tree overrides the plugin's bundled menu through the menuPath setting. This is the tree the settings editor reads and writes; patches and modules add entries with `extraEntries` instead.";
+      };
+      extraEntries = mkOption {
+        type = types.attrsOf menuRowModule;
+        default = { };
+        description = "Menu entries added by patches and non-GUI modules, keyed by dotted id and using the same row shape as `menu`. Entries are merged over `menu` with `lib.recursiveUpdate` when the menu JSON is generated, so a patch can add a section or a child of an existing section without editing the GUI-owned `menu` attrset. The settings editor only reads and writes `menu`, so a GUI save never removes an extra entry.";
       };
       settings = mkOption {
         type = types.toml;

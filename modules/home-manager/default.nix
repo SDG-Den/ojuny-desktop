@@ -12,8 +12,10 @@
     let
       cfg = config.desktop.ojuny;
       dankMenu = osConfig.desktop.ojuny.dankMenu or cfg.dankMenu;
-      toMenuJson = (import ../../lib/dank-menu.nix { inherit lib; }).toMenuJson;
-      menuFile = pkgs.writeText "ojuny-dankmenu.json" (toMenuJson dankMenu.menu);
+      menuLib = import ../../lib/dank-menu.nix { inherit lib; };
+      toMenuJson = menuLib.toMenuJson;
+      menuTree = menuLib.merge dankMenu.menu (dankMenu.extraEntries or { });
+      menuFile = pkgs.writeText "ojuny-dankmenu.json" (toMenuJson menuTree);
       mangoDefaults = import ../../lib/defaults/mango.nix;
       duxDefaults = import ../../lib/defaults/dux.nix;
       barPresetDefaults = import ../../lib/defaults/bar-presets.nix;
@@ -124,7 +126,7 @@
             pluginDefaults.module
             (lib.mkIf (dankMenu.enable or cfg.dankMenu.enable) {
               dankMenu.settings = lib.mkDefault (
-                dankMenu.settings // lib.optionalAttrs (dankMenu.menu != { }) { menuPath = "${menuFile}"; }
+                dankMenu.settings // lib.optionalAttrs (menuTree != { }) { menuPath = "${menuFile}"; }
               );
             })
           ];

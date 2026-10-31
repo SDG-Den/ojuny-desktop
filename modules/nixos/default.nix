@@ -3,8 +3,10 @@
   flake.modules.nixos.ojuny-desktop = { config, lib, pkgs, options, ... }:
   let
     cfg = config.desktop.ojuny;
-    toMenuJson = (import ../../lib/dank-menu.nix { inherit lib; }).toMenuJson;
-    menuFile = pkgs.writeText "ojuny-dankmenu.json" (toMenuJson cfg.dankMenu.menu);
+    menuLib = import ../../lib/dank-menu.nix { inherit lib; };
+    toMenuJson = menuLib.toMenuJson;
+    menuTree = menuLib.merge cfg.dankMenu.menu cfg.dankMenu.extraEntries;
+    menuFile = pkgs.writeText "ojuny-dankmenu.json" (toMenuJson menuTree);
     mangoDefaults = import ../../lib/defaults/mango.nix;
     duxDefaults = import ../../lib/defaults/dux.nix;
     barPresetDefaults = import ../../lib/defaults/bar-presets.nix;
@@ -108,7 +110,7 @@
         (lib.mkIf cfg.dankMenu.enable {
           dankMenu.settings = lib.mkDefault (
             cfg.dankMenu.settings
-            // lib.optionalAttrs (cfg.dankMenu.menu != { }) { menuPath = "${menuFile}"; }
+            // lib.optionalAttrs (menuTree != { }) { menuPath = "${menuFile}"; }
           );
         })
       ];

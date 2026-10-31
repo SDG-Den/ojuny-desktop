@@ -11,7 +11,7 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 ## Configuration generation
 - Mango: TOML generated via custom `lib/to-toml.nix` from structured options (flattened `[global]` keys; binds, mousebinds, axisbinds, gesturebinds as tables; rules as arrays). Written to a store path and linked as `~/.config/mango/ojuny.toml`, which the wrapper passes via `mango -c`. The link sits beside any user-owned `config.toml`/`config.conf`; mango's watcher matches events by exact path, so only `ojuny.toml` changes trigger a reload.
 - Dux Shell: the settings are rendered into a `config.d/00-ojuny.json` fragment, alongside `clsettings.json` (clipboard), `cheatsheets/binds.json`, `plugin_settings.json` and plugin sources, in a store `dms` config tree. Each generated file is symlinked individually into `~/.config/dms`, which stays a real, writable directory so Dux Shell can create and update its own files there (`ojuny-config` user oneshot with `restartTriggers` on NixOS for all users, `home.file` plus an `ojuny-config --seed` user service on Home Manager); no `XDG_CONFIG_HOME` override. `lib/mk-ojuny.nix` returns the link map as `configLinks` and the tree as `duxConfigDir` (`ojuny-dux-config`).
-- Keybinds: single source of truth in `desktop.ojuny.mango.binds/*` and related bind groups; cheatsheet JSON is generated from them via `lib/to-binds.nix`.
+- Keybinds: single source of truth in `desktop.ojuny.mango.binds/*` and related bind groups; cheatsheet JSON is generated from them via `lib/to-binds.nix`, grouped by each bind's `group` with `subcat` as the inner category.
 
 ## Flake structure (dendritic)
 - flake-parts based. Modules imported via `importTree ./modules`.
@@ -27,7 +27,7 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 ## Option schema
 - `desktop.ojuny.enable` (bool)
 - `desktop.ojuny.mango.global` (TOML/attrs), `env`, `var`, `execOnce`, `exec`, `source`, `rules` (TOML), `binds`, `mousebind`, `axisbind`, `gesturebind` (bind groups)
-- `desktop.ojuny.mango.binds.<mode>.<name> = { modifier = [string]; keys = [string]; dispatcher = string; args = list|string; description = string; subcat = string; }`
+- `desktop.ojuny.mango.binds.<mode>.<name> = { modifier = [string]; keys = [string]; dispatcher = string; args = list|string; description = string; group = string; subcat = string; }` — `group` is the cheatsheet's top-level category (default `Other`), `subcat` sorts entries within it; `lib/to-binds.nix` reads both.
 - `desktop.ojuny.dux.settings` (TOML, settings.json), `clipboardSettings` (clsettings.json), `managePluginSettings` (bool)
 - `desktop.ojuny.dux.{barConfigs,dockConfigs,controlCenterWidgets,dashCards,dashTabs}` (attrsOf keyed by id) and `dashOptions` (TOML) — convenience options rendered to Dux Shell arrays by `lib/mk-config.nix`; per-entry `_order` controls array position
 - `desktop.ojuny.dux.plugins.<name> = { enable = bool; src = path/package; settings = TOML; }`
@@ -59,7 +59,7 @@ All options live under `desktop.ojuny.*` and are shared across NixOS and Home Ma
 - `lib/stylix-colors.nix`: maps stylix base16 colors to mango global color tokens
 
 ## Plugin registry
-Dux Shell plugin registry (`inputs.dux-plugin-registry`) is mapped into `desktop.ojuny.dux.plugins.<name>.src = mkDefault ...` for both HM and NixOS, allowing overrides. `lib/defaults/plugins.nix` enables `dankMenu`, `dankKDEConnect`, `nixMonitor`, `localServices`, `scratchpadHelper`, and `developerUtilities` with `mkDefault` because the default UI references them. Their runtime dependencies (`iproute2`, `kdePackages.kdeconnect-kde`) are part of the session PATH, with `kdeconnect` enabled as a user service on NixOS and Home Manager.
+Dux Shell plugin registry (`inputs.dux-plugin-registry`) is mapped into `desktop.ojuny.dux.plugins.<name>.src = mkDefault ...` for both HM and NixOS, allowing overrides. `lib/defaults/plugins.nix` enables `dankMenu`, `dankKDEConnect`, `nixMonitor`, `localServices`, `scratchpadHelper`, and `developerUtilities` with `mkDefault` because the default UI references them. Their runtime dependencies (`iproute2`, `kdePackages.kdeconnect-kde`) are part of the session PATH, with `kdeconnect` enabled as a user service on NixOS and Home Manager. The SFTP prerequisites are enabled alongside them: `services.gvfs`, `programs.ssh.startAgent` and the `SSH_AUTH_SOCK` export in `environment.d/50-ssh-agent.conf`, because Valent mounts the device under `/run/user/<uid>/gvfs` and runs `ssh-add`.
 
 ## Nested runner (packages/desktop-runner)
 `packages.default` provides `ojuny-desktop` script that runs the wrapped session under `dbus-run-session` for a self-contained try-it experience with defaults. It uses temporary `XDG_CONFIG_HOME`, `XDG_STATE_HOME`, `XDG_CACHE_HOME`, and `XDG_DATA_HOME` directories, invokes the same `ojuny-config` linker as the modules, enables the shared plugin set, and places the generated Ghostty config in the temporary config home.
